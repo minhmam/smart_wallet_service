@@ -1,0 +1,5 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://192.168.68.111:5432/smart_wallet
+    username: admin
+    password: adminA@1
