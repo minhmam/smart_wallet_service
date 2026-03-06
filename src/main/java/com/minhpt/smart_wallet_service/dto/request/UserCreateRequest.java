@@ -15,8 +15,8 @@ public class UserCreateRequest {
     @NotBlank(message = "Username is required")
     private String username;
 
-    @Email(message = "Email invalid")
     @NotBlank(message = "Email is required")
+    @Email(message = "Email invalid")
     private String email;
 
     @NotBlank(message = "Password is required")
