@@ -1,5 +1,8 @@
 package com.minhpt.smart_wallet_service.model;
 
+import com.minhpt.smart_wallet_service.constant.Constant;
+import com.minhpt.smart_wallet_service.config.SpringContextHolder;
+import com.minhpt.smart_wallet_service.util.AuthenticationUtil;
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.PrePersist;
@@ -30,17 +33,25 @@ public abstract class BaseEntity {
 
     @PrePersist
     public void prePersist() {
+
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
-        this.createdBy = "system";
-        this.updatedBy = "system";
+
+        AuthenticationUtil authUtil = SpringContextHolder.getBean(AuthenticationUtil.class);
+        String username = authUtil.getCurrentUser().getUsername();
+        this.setCreatedBy(username != null ? username : Constant.USER_DEFAULT);
+        this.setUpdatedBy(username != null ? username : Constant.USER_DEFAULT);
+
         this.status = 1;
     }
 
     @PreUpdate
     public void preUpdate() {
+
         this.updatedAt = LocalDateTime.now();
-        this.updatedBy = "system";
-        this.status = 1;
+
+        AuthenticationUtil authUtil = SpringContextHolder.getBean(AuthenticationUtil.class);
+        String username = authUtil.getCurrentUser().getUsername();
+        this.setUpdatedBy(username != null ? username : Constant.USER_DEFAULT);
     }
 }

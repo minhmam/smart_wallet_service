@@ -1,6 +1,6 @@
 package com.minhpt.smart_wallet_service.service.impl;
 
-import com.minhpt.smart_wallet_service.config.AuthenticationUtil;
+import com.minhpt.smart_wallet_service.util.AuthenticationUtil;
 import com.minhpt.smart_wallet_service.dto.request.UserCreateRequest;
 import com.minhpt.smart_wallet_service.dto.request.UserUpdateRequest;
 import com.minhpt.smart_wallet_service.dto.response.UserResponse;

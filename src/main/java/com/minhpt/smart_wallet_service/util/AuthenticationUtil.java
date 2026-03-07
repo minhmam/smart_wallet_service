@@ -1,4 +1,4 @@
-package com.minhpt.smart_wallet_service.config;
+package com.minhpt.smart_wallet_service.util;
 
 import com.minhpt.smart_wallet_service.model.User;
 import com.minhpt.smart_wallet_service.repository.UserRepository;
