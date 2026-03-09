@@ -3,6 +3,7 @@ package com.minhpt.smart_wallet_service.service;
 import com.minhpt.smart_wallet_service.dto.request.CategoryCreateRequest;
 import com.minhpt.smart_wallet_service.dto.request.CategorySearchRequest;
 import com.minhpt.smart_wallet_service.dto.response.CategoryResponse;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 import java.util.Map;
@@ -21,6 +22,6 @@ public interface CategoryService {
 
     void changePin(Long id);
 
-    Map<String, Object> search(CategorySearchRequest request);
+    Page<CategoryResponse> search(CategorySearchRequest request);
 
 }

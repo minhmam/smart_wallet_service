@@ -10,10 +10,10 @@ import com.minhpt.smart_wallet_service.repository.CategoryRepository;
 import com.minhpt.smart_wallet_service.service.CategoryService;
 import com.minhpt.smart_wallet_service.util.AuthenticationUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -87,7 +87,7 @@ public class CategoryInterfaceImpl implements CategoryService {
     }
 
     @Override
-    public Map<String, Object> search(CategorySearchRequest request) {
+    public Page<CategoryResponse> search(CategorySearchRequest request) {
         return categoryRepository.search(request);
     }
 

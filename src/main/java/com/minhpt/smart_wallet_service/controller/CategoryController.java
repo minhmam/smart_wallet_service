@@ -5,15 +5,14 @@ import com.minhpt.smart_wallet_service.constant.Constant;
 import com.minhpt.smart_wallet_service.dto.request.CategoryCreateRequest;
 import com.minhpt.smart_wallet_service.dto.request.CategorySearchRequest;
 import com.minhpt.smart_wallet_service.dto.response.CategoryResponse;
-import com.minhpt.smart_wallet_service.service.CategoryServiceCustom;
 import com.minhpt.smart_wallet_service.service.CategoryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/categories")
@@ -23,13 +22,14 @@ public class CategoryController {
     private final CategoryService categoryService;
 
     @PostMapping("/search")
-    public ResponseEntity<ApiResponse<Map<String, Object>>> search(@RequestBody CategorySearchRequest req){
-        Map<String, Object> map = categoryService.search(req);
+    public ResponseEntity<ApiResponse<List<CategoryResponse>>> search(@RequestBody CategorySearchRequest req){
+        Page<CategoryResponse> page = categoryService.search(req);
         return ResponseEntity.ok(
-                ApiResponse.<Map<String, Object>>builder()
+                ApiResponse.<List<CategoryResponse>>builder()
                         .status(200)
                         .message(Constant.SUCCESS)
-                        .data(map)
+                        .data(page.getContent())
+                        .total(page.getTotalElements())
                         .build()
         );
     }

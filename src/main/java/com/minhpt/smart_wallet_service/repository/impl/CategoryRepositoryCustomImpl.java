@@ -6,12 +6,13 @@ import com.minhpt.smart_wallet_service.repository.CategoryRepositoryCustom;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Repository
 public class CategoryRepositoryCustomImpl implements CategoryRepositoryCustom {
@@ -20,9 +21,8 @@ public class CategoryRepositoryCustomImpl implements CategoryRepositoryCustom {
     private EntityManager em;
 
     @Override
-    public Map<String, Object> search(CategorySearchRequest request) {
+    public Page<CategoryResponse> search(CategorySearchRequest request) {
         List<CategoryResponse> categories = new ArrayList<>();
-        Map<String, Object> resultData = new HashMap<>();
 
         StringBuilder sql = new StringBuilder("""
                 SELECT name, type, icon
@@ -39,10 +39,10 @@ public class CategoryRepositoryCustomImpl implements CategoryRepositoryCustom {
 
         sql.append(" ORDER BY pin DESC, updated_at DESC");
 
-        String strCount = "SELECT COUNT(*) FROM ( " + sql.toString() + " )";
+        String countSQL = "SELECT COUNT(*) FROM ( " + sql + " ) as toal";
 
         Query query = em.createNativeQuery(sql.toString());
-        Query queryCount = em.createNativeQuery(strCount);
+        Query queryCount = em.createNativeQuery(countSQL);
 
         if (request.getName() != null && !request.getName().isBlank()) {
             query.setParameter("name", "%" + request.getName() + "%");
@@ -61,7 +61,7 @@ public class CategoryRepositoryCustomImpl implements CategoryRepositoryCustom {
         query.setMaxResults(size);
 
         List<Object[]> result = query.getResultList();
-//        Long total = ((BigDecimal) queryCount.getSingleResult()).longValue();
+        Long total = ((Number) queryCount.getSingleResult()).longValue();
 
         if (result != null && !result.isEmpty()) {
             for (Object[] item : result) {
@@ -75,9 +75,10 @@ public class CategoryRepositoryCustomImpl implements CategoryRepositoryCustom {
             }
         }
 
-        resultData.put("data", categories);
-//        resultData.put("total", total);
-
-        return resultData;
+        return new PageImpl<>(
+                categories,
+                PageRequest.of(page, size),
+                total
+        );
     }
 }
