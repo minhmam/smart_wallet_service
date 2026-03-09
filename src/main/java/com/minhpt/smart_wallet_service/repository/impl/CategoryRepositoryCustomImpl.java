@@ -3,6 +3,7 @@ package com.minhpt.smart_wallet_service.repository.impl;
 import com.minhpt.smart_wallet_service.dto.request.CategorySearchRequest;
 import com.minhpt.smart_wallet_service.dto.response.CategoryResponse;
 import com.minhpt.smart_wallet_service.repository.CategoryRepositoryCustom;
+import com.minhpt.smart_wallet_service.util.AuthenticationUtil;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
@@ -17,12 +18,20 @@ import java.util.List;
 @Repository
 public class CategoryRepositoryCustomImpl implements CategoryRepositoryCustom {
 
+    private final AuthenticationUtil authenticationUtil;
     @PersistenceContext
     private EntityManager em;
+
+    public CategoryRepositoryCustomImpl(AuthenticationUtil authenticationUtil) {
+        this.authenticationUtil = authenticationUtil;
+    }
+
 
     @Override
     public Page<CategoryResponse> search(CategorySearchRequest request) {
         List<CategoryResponse> categories = new ArrayList<>();
+        int page = request.getPage();
+        int size = request.getSize();
 
         StringBuilder sql = new StringBuilder("""
                 SELECT name, type, icon
@@ -39,7 +48,7 @@ public class CategoryRepositoryCustomImpl implements CategoryRepositoryCustom {
 
         sql.append(" ORDER BY pin DESC, updated_at DESC");
 
-        String countSQL = "SELECT COUNT(*) FROM ( " + sql + " ) as toal";
+        String countSQL = "SELECT COUNT(*) FROM ( " + sql + " ) as total";
 
         Query query = em.createNativeQuery(sql.toString());
         Query queryCount = em.createNativeQuery(countSQL);
@@ -54,14 +63,10 @@ public class CategoryRepositoryCustomImpl implements CategoryRepositoryCustom {
             queryCount.setParameter("type", request.getType());
         }
 
-        int page = request.getPage();
-        int size = request.getSize();
-
         query.setFirstResult(page * size);
         query.setMaxResults(size);
 
         List<Object[]> result = query.getResultList();
-        Long total = ((Number) queryCount.getSingleResult()).longValue();
 
         if (result != null && !result.isEmpty()) {
             for (Object[] item : result) {
@@ -78,7 +83,46 @@ public class CategoryRepositoryCustomImpl implements CategoryRepositoryCustom {
         return new PageImpl<>(
                 categories,
                 PageRequest.of(page, size),
-                total
+                (long) queryCount.getSingleResult()
         );
+    }
+
+    @Override
+    public List<CategoryResponse> getTop5MostUsedCategories() {
+        List<CategoryResponse> categories = new ArrayList<>();
+
+        String sql = "SELECT " +
+                " c.name, " +
+                " c.type, " +
+                " c.icon, " +
+                " COUNT(t.id) AS used " +
+                " FROM categories c " +
+                " LEFT JOIN transactions t ON c.id = t.category_id " +
+                " LEFT JOIN users u on u.id = t.user_id  " +
+                " WHERE t.status = 1 and t.user_id  = :userId " +
+                " GROUP BY c.id, c.name, c.type, c.icon " +
+                " ORDER BY used DESC " +
+                " LIMIT 5 ";
+
+        Query query = em.createNativeQuery(sql);
+
+        Long id = authenticationUtil.getCurrentUser().getId();
+
+        query.setParameter("userId", id);
+
+        List<Object[]> result = query.getResultList();
+
+        if (result != null && !result.isEmpty()) {
+            for (Object[] item : result) {
+                CategoryResponse category = new CategoryResponse();
+
+                category.setName(item[0] != null ? item[0].toString() : null);
+                category.setType(item[1] != null ? item[1].toString() : null);
+                category.setIcon(item[2] != null ? item[2].toString() : null);
+
+                categories.add(category);
+            }
+        }
+        return categories;
     }
 }

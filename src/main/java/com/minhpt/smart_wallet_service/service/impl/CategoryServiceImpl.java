@@ -17,7 +17,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class CategoryInterfaceImpl implements CategoryService {
+public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
     private final CategoryMapper categoryMapper;
@@ -27,9 +27,7 @@ public class CategoryInterfaceImpl implements CategoryService {
     public CategoryResponse create(CategoryCreateRequest req) {
         Category category = categoryMapper.toEntity(req);
 
-        Category savedCategory = categoryRepository.save(category);
-
-        return categoryMapper.toResponse(savedCategory);
+        return categoryMapper.toResponse(categoryRepository.save(category));
     }
 
     @Override
@@ -57,9 +55,9 @@ public class CategoryInterfaceImpl implements CategoryService {
 
     @Override
     public void delete(Long id) {
-        Category deteleCategory = categoryRepository.findById(id)
+        Category deteleCategory = categoryRepository.findByIdAndStatus(id, Constant.NOT_DELETE)
                 .orElseThrow(() -> new RuntimeException("Category not found by ID = " + id));
-        deteleCategory.setStatus(0);
+        deteleCategory.setStatus(Constant.DELETED);
         categoryRepository.save(deteleCategory);
     }
 
@@ -89,6 +87,11 @@ public class CategoryInterfaceImpl implements CategoryService {
     @Override
     public Page<CategoryResponse> search(CategorySearchRequest request) {
         return categoryRepository.search(request);
+    }
+
+    @Override
+    public List<CategoryResponse> getTop5MostUsedCategories() {
+        return categoryRepository.getTop5MostUsedCategories();
     }
 
 }

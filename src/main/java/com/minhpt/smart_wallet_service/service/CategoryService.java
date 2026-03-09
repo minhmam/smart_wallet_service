@@ -6,7 +6,6 @@ import com.minhpt.smart_wallet_service.dto.response.CategoryResponse;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
-import java.util.Map;
 
 public interface CategoryService {
 
@@ -23,5 +22,7 @@ public interface CategoryService {
     void changePin(Long id);
 
     Page<CategoryResponse> search(CategorySearchRequest request);
+
+    List<CategoryResponse> getTop5MostUsedCategories();
 
 }

@@ -16,6 +16,6 @@ public class AuthenticationUtil {
 
         //Trả ra thông tin user đăng nhập
         return userRepository.findById(16L)
-                .orElse(new User());
+                .orElseThrow(() -> new RuntimeException("Tai khoan khong hop le"));
     }
 }

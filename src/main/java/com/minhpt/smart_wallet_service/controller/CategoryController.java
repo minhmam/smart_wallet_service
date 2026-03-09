@@ -21,6 +21,19 @@ public class CategoryController {
 
     private final CategoryService categoryService;
 
+    @GetMapping("/top-5/get")
+    public ResponseEntity<ApiResponse<List<CategoryResponse>>> getTop5MostUsedCategories(){
+        List<CategoryResponse> categories = categoryService.getTop5MostUsedCategories();
+        return ResponseEntity.ok(
+                ApiResponse.<List<CategoryResponse>>builder().
+                        status(200)
+                        .message(Constant.SUCCESS)
+                        .data(categories)
+                        .total(categories.size())
+                        .build()
+        );
+    }
+
     @PostMapping("/search")
     public ResponseEntity<ApiResponse<List<CategoryResponse>>> search(@RequestBody CategorySearchRequest req){
         Page<CategoryResponse> page = categoryService.search(req);
@@ -58,7 +71,6 @@ public class CategoryController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<CategoryResponse>> deleteCategory(@PathVariable Long id){
-
         categoryService.delete(id);
         return ResponseEntity.ok(
                 ApiResponse.<CategoryResponse>builder()

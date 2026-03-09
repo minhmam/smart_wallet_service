@@ -1,6 +1,5 @@
 package com.minhpt.smart_wallet_service.model;
 
-import com.minhpt.smart_wallet_service.enums.UserStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
