@@ -1,6 +1,5 @@
 package com.minhpt.smart_wallet_service.config;
 
-
 import org.mapstruct.MapperConfig;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.mapstruct.ReportingPolicy;

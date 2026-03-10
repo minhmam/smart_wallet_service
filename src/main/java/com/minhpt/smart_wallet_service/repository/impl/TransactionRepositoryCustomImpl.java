@@ -43,14 +43,6 @@ public class TransactionRepositoryCustomImpl implements TransactionRepositoryCus
             sql.append(" and (upper(t.description) like upper(:keySearch)) ");
         }
 
-//        if(req.getAmount() != null && req.getAmount() >= 0){
-//            sql.append(" and t.amount between 0 and :amount");
-//        }
-//
-//        if(req.getDescription() != null && !req.getDescription().isEmpty()){
-//            sql.append("and t.description like :description");
-//        }
-
         Query query = em.createNativeQuery(sql.toString());
         Query queryCount = em.createNativeQuery("SELECT COUNT(*) FROM (" + sql.toString()+ ") as total");
 
@@ -58,16 +50,6 @@ public class TransactionRepositoryCustomImpl implements TransactionRepositoryCus
             query.setParameter("keySearch", "%" + req.getKeySearch() + "%");
             queryCount.setParameter("keySearch", "%" + req.getKeySearch() + "%");
         }
-
-//        if(req.getAmount() != null && req.getAmount() >= 0){
-//            query.setParameter("amount", req.getAmount());
-//            queryCount.setParameter("amount", req.getAmount());
-//        }
-//
-//        if(req.getDescription() != null && !req.getDescription().isEmpty()){
-//            query.setParameter("description", req.getDescription());
-//            queryCount.setParameter("description", req.getDescription());
-//        }
 
         query.setFirstResult(page * size);
         query.setMaxResults(size);
