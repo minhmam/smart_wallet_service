@@ -22,16 +22,14 @@ public class UserServiceImpl implements UserService {
     private final AuthenticationUtil authenticationUtil;
 
     @Override
-    public UserResponse createUser(UserCreateRequest req) {
+    public void createUser(UserCreateRequest req) {
         User user = userMapper.toEntity(req);
 
         User savedUser = userRepository.save(user);
-
-        return userMapper.toResponse(savedUser);
     }
 
     @Override
-    public UserResponse updateUser(UserUpdateRequest req) {
+    public void updateUser(UserUpdateRequest req) {
         User userLogin = authenticationUtil.getCurrentUser();
 
         User updateUser = userRepository.findById(userLogin.getId())
@@ -53,8 +51,6 @@ public class UserServiceImpl implements UserService {
         updateUser.setUpdatedBy("system");
 
         userRepository.save(updateUser);
-
-        return userMapper.toResponse(updateUser);
     }
 
     @Override

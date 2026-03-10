@@ -14,7 +14,7 @@ import java.util.Map;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiResponse<Map<String, String>>> exceptionHandler(MethodArgumentNotValidException ex){
+    public ResponseEntity<ApiResponse> exceptionHandler(MethodArgumentNotValidException ex){
 
         Map<String, String> errors = new HashMap<>();
 
@@ -23,7 +23,7 @@ public class GlobalExceptionHandler {
         });
 
         return ResponseEntity.badRequest().body(
-                ApiResponse.<Map<String, String>> builder()
+                ApiResponse.builder()
                         .status(HttpStatus.BAD_REQUEST.value())
                         .message("Validation falied")
                         .data(errors)

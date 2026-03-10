@@ -22,24 +22,23 @@ public class CategoryController {
     private final CategoryService categoryService;
 
     @GetMapping("/top-5/get")
-    public ResponseEntity<ApiResponse<List<CategoryResponse>>> getTop5MostUsedCategories(){
+    public ResponseEntity<ApiResponse> getTop5MostUsedCategories(){
         List<CategoryResponse> categories = categoryService.getTop5MostUsedCategories();
-        return ResponseEntity.ok(
-                ApiResponse.<List<CategoryResponse>>builder().
-                        status(200)
-                        .message(Constant.SUCCESS)
-                        .data(categories)
-                        .total(categories.size())
-                        .build()
+
+        return ResponseEntity.ok(ApiResponse.builder()
+                .status(Constant.CODE.OK)
+                .data(categories)
+                .build()
         );
     }
 
     @PostMapping("/search")
-    public ResponseEntity<ApiResponse<List<CategoryResponse>>> search(@RequestBody CategorySearchRequest req){
+    public ResponseEntity<ApiResponse> search(@RequestBody CategorySearchRequest req){
         Page<CategoryResponse> page = categoryService.search(req);
+
         return ResponseEntity.ok(
-                ApiResponse.<List<CategoryResponse>>builder()
-                        .status(200)
+                ApiResponse.builder()
+                        .status(Constant.CODE.OK)
                         .message(Constant.SUCCESS)
                         .data(page.getContent())
                         .total(page.getTotalElements())
@@ -48,10 +47,10 @@ public class CategoryController {
     }
 
     @PostMapping("/")
-    public ResponseEntity<ApiResponse<CategoryResponse>> createCategory(@Valid @RequestBody CategoryCreateRequest req){
+    public ResponseEntity<ApiResponse> createCategory(@Valid @RequestBody CategoryCreateRequest req){
         return ResponseEntity.ok(
-                ApiResponse.<CategoryResponse>builder()
-                        .status(200)
+                ApiResponse.builder()
+                        .status(Constant.CODE.OK)
                         .message(Constant.SUCCESS)
                         .data(categoryService.create(req))
                         .build()
@@ -59,10 +58,10 @@ public class CategoryController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<CategoryResponse>> updateCategory(@PathVariable Long id, @Valid @RequestBody CategoryCreateRequest req){
+    public ResponseEntity<ApiResponse> updateCategory(@PathVariable Long id, @Valid @RequestBody CategoryCreateRequest req){
         return ResponseEntity.ok(
-                ApiResponse.<CategoryResponse>builder()
-                        .status(200)
+                ApiResponse.builder()
+                        .status(Constant.CODE.OK)
                         .message(Constant.SUCCESS)
                         .data(categoryService.update(req, id))
                         .build()
@@ -70,21 +69,21 @@ public class CategoryController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<CategoryResponse>> deleteCategory(@PathVariable Long id){
+    public ResponseEntity<ApiResponse> deleteCategory(@PathVariable Long id){
         categoryService.delete(id);
         return ResponseEntity.ok(
-                ApiResponse.<CategoryResponse>builder()
-                        .status(200)
+                ApiResponse.builder()
+                        .status(Constant.CODE.OK)
                         .message(Constant.SUCCESS)
                         .build()
         );
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<CategoryResponse>>> getAll(){
+    public ResponseEntity<ApiResponse> getAll(){
         return ResponseEntity.ok(
-                ApiResponse.<List<CategoryResponse>>builder()
-                        .status(200)
+                ApiResponse.builder()
+                        .status(Constant.CODE.OK)
                         .message(Constant.SUCCESS)
                         .data(categoryService.getAll())
                         .build()
@@ -96,7 +95,7 @@ public class CategoryController {
         categoryService.changePin(id);
         return ResponseEntity.ok(
                 ApiResponse.builder()
-                        .status(200)
+                        .status(Constant.CODE.OK)
                         .message(Constant.SUCCESS)
                         .build()
         );

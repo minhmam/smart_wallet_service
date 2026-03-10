@@ -22,10 +22,10 @@ public class TransactionController {
     private final TransactionService transactionService;
 
     @PostMapping("/search")
-    public ResponseEntity<ApiResponse<List<TransactionResponse>>> search(@RequestBody TransactionSearchRequest req){
+    public ResponseEntity<ApiResponse> search(@RequestBody TransactionSearchRequest req){
         Page<TransactionResponse> page = transactionService.search(req);
         return ResponseEntity.ok(
-                ApiResponse.<List<TransactionResponse>>builder()
+                ApiResponse.builder()
                         .status(200)
                         .message(Constant.SUCCESS)
                         .data(page.getContent())
@@ -35,9 +35,9 @@ public class TransactionController {
     }
 
     @PostMapping("/")
-    public ResponseEntity<ApiResponse<TransactionResponse>> create(@Valid @RequestBody TransactionCreateRequest req) {
+    public ResponseEntity<ApiResponse> create(@Valid @RequestBody TransactionCreateRequest req) {
         return ResponseEntity.ok(
-                ApiResponse.<TransactionResponse>builder()
+                ApiResponse.builder()
                         .status(200)
                         .message(Constant.SUCCESS)
                         .data(transactionService.create(req))
@@ -47,9 +47,9 @@ public class TransactionController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<TransactionResponse>> update(@PathVariable Long id, @Valid @RequestBody TransactionCreateRequest req) {
+    public ResponseEntity<ApiResponse> update(@PathVariable Long id, @Valid @RequestBody TransactionCreateRequest req) {
         return ResponseEntity.ok(
-                ApiResponse.<TransactionResponse>builder()
+                ApiResponse.builder()
                         .status(200)
                         .message(Constant.SUCCESS)
                         .data(transactionService.update(req, id))
@@ -59,9 +59,9 @@ public class TransactionController {
     }
 
     @GetMapping()
-    public ResponseEntity<ApiResponse<List<TransactionResponse>>> getAll(){
+    public ResponseEntity<ApiResponse> getAll(){
         return ResponseEntity.ok(
-                ApiResponse.<List<TransactionResponse>>builder()
+                ApiResponse.builder()
                         .status(200)
                         .message(Constant.SUCCESS)
                         .data(transactionService.getAll())
@@ -71,9 +71,9 @@ public class TransactionController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<TransactionResponse>> getDetailsTransaction(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse> getDetailsTransaction(@PathVariable Long id) {
         return ResponseEntity.ok(
-                ApiResponse.<TransactionResponse>builder()
+                ApiResponse.builder()
                         .status(200)
                         .message(Constant.SUCCESS)
                         .data(transactionService.getDetailsTransaction(id))
@@ -82,7 +82,7 @@ public class TransactionController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<TransactionResponse>> delete(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse> delete(@PathVariable Long id) {
         transactionService.delete(id);
         return ResponseEntity.ok(
                 ApiResponse.<TransactionResponse>builder()

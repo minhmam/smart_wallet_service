@@ -6,9 +6,9 @@ import com.minhpt.smart_wallet_service.dto.response.UserResponse;
 
 public interface UserService {
 
-    UserResponse createUser(UserCreateRequest request);
+    void createUser(UserCreateRequest request);
 
-    UserResponse updateUser(UserUpdateRequest request);
+    void updateUser(UserUpdateRequest request);
 
     UserResponse getById();
 }
