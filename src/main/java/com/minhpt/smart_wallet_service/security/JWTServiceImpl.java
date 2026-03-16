@@ -3,6 +3,7 @@ package com.minhpt.smart_wallet_service.security;
 import com.minhpt.smart_wallet_service.model.User;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -10,8 +11,11 @@ import java.util.Date;
 @Service
 public class JWTServiceImpl implements JWTService {
 
-    private static final String SECRET =
-            "smart-wallet-secret-key-smart-wallet-smart-wallet";
+    @Value("${jwt.secret}")
+    private String secret;
+
+    @Value("${jwt.expiration}")
+    private String expiration;
 
     @Override
     public String generateToken(User user) {
@@ -24,7 +28,7 @@ public class JWTServiceImpl implements JWTService {
                         new Date(System.currentTimeMillis() + 900000)
                 )
                 .signWith(
-                        Keys.hmacShaKeyFor(SECRET.getBytes())
+                        Keys.hmacShaKeyFor(secret.getBytes())
                 )
                 .compact();
     }
@@ -33,7 +37,7 @@ public class JWTServiceImpl implements JWTService {
     public String extractUserId(String token) {
 
         return Jwts.parserBuilder()
-                .setSigningKey(SECRET.getBytes())
+                .setSigningKey(secret.getBytes())
                 .build()
                 .parseClaimsJws(token)
                 .getBody()
@@ -46,7 +50,7 @@ public class JWTServiceImpl implements JWTService {
         try {
 
             Jwts.parserBuilder()
-                    .setSigningKey(SECRET.getBytes())
+                    .setSigningKey(secret.getBytes())
                     .build()
                     .parseClaimsJws(token);
 

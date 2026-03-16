@@ -25,11 +25,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponse createUser(UserCreateRequest req) {
+
         User user = userMapper.toEntity(req);
 
-        user.setPassword(
-                passwordEncoder.encode(req.getPassword())
-        );
+        user.setPassword(passwordEncoder.encode(req.getPassword()));
+        user.setRole("USER");
 
         User savedUser = userRepository.save(user);
 

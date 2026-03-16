@@ -27,13 +27,12 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<UserResponse>> createUser(@Valid @RequestBody UserCreateRequest req) {
-        UserResponse user = userService.createUser(req);
 
         return ResponseEntity.ok(
                 ApiResponse.<UserResponse>builder()
                 .status(200)
                 .message("User created successfully")
-                .data(user)
+                .data(userService.createUser(req))
                 .build()
         );
     }
