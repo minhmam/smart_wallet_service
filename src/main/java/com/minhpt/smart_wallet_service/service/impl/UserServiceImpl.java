@@ -9,6 +9,7 @@ import com.minhpt.smart_wallet_service.model.User;
 import com.minhpt.smart_wallet_service.repository.UserRepository;
 import com.minhpt.smart_wallet_service.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -20,10 +21,15 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final AuthenticationUtil authenticationUtil;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public UserResponse createUser(UserCreateRequest req) {
         User user = userMapper.toEntity(req);
+
+        user.setPassword(
+                passwordEncoder.encode(req.getPassword())
+        );
 
         User savedUser = userRepository.save(user);
 

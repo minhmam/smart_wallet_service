@@ -19,18 +19,6 @@ public class UserController {
 
     private final UserService userService;
 
-    @PostMapping("/create")
-    public ResponseEntity<ApiResponse<UserResponse>> createUser(@Valid @RequestBody UserCreateRequest req) {
-        UserResponse user = userService.createUser(req);
-
-        ApiResponse<UserResponse> res = ApiResponse.<UserResponse>builder()
-                .status(200)
-                .message("User created successfully")
-                .data(user)
-                .build();
-
-        return ResponseEntity.ok(res);
-    }
 
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<UserResponse>> updateUser(@PathVariable Long id, @Valid @RequestBody UserUpdateRequest req){

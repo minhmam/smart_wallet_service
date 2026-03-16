@@ -37,4 +37,17 @@ public class User extends BaseEntity {
 
     @Column(name = "password")
     private String password;
+
+    @Column(name = "provider")
+    private String provider;
+
+    @Column(name = "provider_id")
+    private String providerId;
+
+    @Column(name = "role")
+    private String role;
+
+    @Column(name = "is_email_verified")
+    private int isEmailVerified;
+
 }
