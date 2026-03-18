@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -16,4 +18,6 @@ public class ApiResponse<T> {
     private String message;
     private T data;
     private Object total;
+    private LocalDateTime timestamp;
+    private String path;
 }

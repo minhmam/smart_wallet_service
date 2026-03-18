@@ -47,7 +47,7 @@ public class CategoryController {
         );
     }
 
-    @PostMapping("/")
+    @PostMapping("")
     public ResponseEntity<ApiResponse<CategoryResponse>> createCategory(@Valid @RequestBody CategoryCreateRequest req){
         return ResponseEntity.ok(
                 ApiResponse.<CategoryResponse>builder()

@@ -1,5 +1,7 @@
 package com.minhpt.smart_wallet_service.service.impl;
 
+import com.minhpt.smart_wallet_service.constant.Constant;
+import com.minhpt.smart_wallet_service.service.VerificationTokenService;
 import com.minhpt.smart_wallet_service.util.AuthenticationUtil;
 import com.minhpt.smart_wallet_service.dto.request.UserCreateRequest;
 import com.minhpt.smart_wallet_service.dto.request.UserUpdateRequest;
@@ -22,6 +24,7 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
     private final AuthenticationUtil authenticationUtil;
     private final PasswordEncoder passwordEncoder;
+    private final VerificationTokenService verificationTokenService;
 
     @Override
     public UserResponse createUser(UserCreateRequest req) {
@@ -30,8 +33,11 @@ public class UserServiceImpl implements UserService {
 
         user.setPassword(passwordEncoder.encode(req.getPassword()));
         user.setRole("USER");
+        user.setIsEmailVerified(Constant.NOT_VERIFIED);
 
         User savedUser = userRepository.save(user);
+
+        verificationTokenService.sendVerifyEmail(savedUser);
 
         return userMapper.toResponse(savedUser);
     }

@@ -9,13 +9,13 @@ import org.springframework.stereotype.Service;
 import java.util.Date;
 
 @Service
-public class JWTServiceImpl implements JWTService {
+public class JwtServiceImpl implements JwtService {
 
     @Value("${jwt.secret}")
     private String secret;
 
     @Value("${jwt.expiration}")
-    private String expiration;
+    private Long expiration;
 
     @Override
     public String generateToken(User user) {
@@ -25,7 +25,7 @@ public class JWTServiceImpl implements JWTService {
                 .claim("role", user.getRole())
                 .setIssuedAt(new Date())
                 .setExpiration(
-                        new Date(System.currentTimeMillis() + 900000)
+                        new Date(System.currentTimeMillis() + expiration)
                 )
                 .signWith(
                         Keys.hmacShaKeyFor(secret.getBytes())
@@ -48,7 +48,6 @@ public class JWTServiceImpl implements JWTService {
     public boolean isValid(String token) {
 
         try {
-
             Jwts.parserBuilder()
                     .setSigningKey(secret.getBytes())
                     .build()

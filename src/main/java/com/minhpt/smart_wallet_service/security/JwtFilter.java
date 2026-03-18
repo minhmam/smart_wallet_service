@@ -1,5 +1,6 @@
 package com.minhpt.smart_wallet_service.security;
 
+import com.minhpt.smart_wallet_service.constant.Constant;
 import com.minhpt.smart_wallet_service.model.User;
 import com.minhpt.smart_wallet_service.repository.UserRepository;
 import jakarta.servlet.FilterChain;
@@ -18,10 +19,18 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
-public class JWTFilter extends OncePerRequestFilter {
+public class JwtFilter extends OncePerRequestFilter {
 
-    private final JWTService jwtService;
+    private final JwtService jwtService;
     private final UserRepository userRepository;
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request){
+        String path = request.getServletPath();
+        return path.startsWith("/auth/")
+                || path.startsWith("/swagger-ui/")
+                || path.startsWith("/v3/api-docs/");
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -31,11 +40,23 @@ public class JWTFilter extends OncePerRequestFilter {
 
             String token = header.substring(7);
 
-            if (jwtService.isValid(token)) {
+            if (!jwtService.isValid(token)) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json");
+                response.getWriter().write("""
+                        {
+                          "status": 401,
+                          "message": "Invalid or expired token"
+                        }
+                        """);
+                return;
+            }
+
+            if (SecurityContextHolder.getContext().getAuthentication() == null) {
 
                 String userId = jwtService.extractUserId(token);
 
-                User user = userRepository.findById(Long.valueOf(userId))
+                User user = userRepository.findByIdAndStatus(Long.valueOf(userId), Constant.NOT_DELETE)
                         .orElse(null);
 
                 if (user != null) {
@@ -47,8 +68,7 @@ public class JWTFilter extends OncePerRequestFilter {
                                     List.of(new SimpleGrantedAuthority(user.getRole()))
                             );
 
-                    SecurityContextHolder.getContext()
-                            .setAuthentication(auth);
+                    SecurityContextHolder.getContext().setAuthentication(auth);
                 }
             }
         }

@@ -9,8 +9,10 @@ import com.minhpt.smart_wallet_service.dto.response.UserResponse;
 import com.minhpt.smart_wallet_service.model.User;
 import com.minhpt.smart_wallet_service.service.AuthService;
 import com.minhpt.smart_wallet_service.service.UserService;
+import com.minhpt.smart_wallet_service.util.AuthenticationUtil;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
+@Slf4j
 public class AuthController {
 
     private final UserService userService;
@@ -27,7 +30,6 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<UserResponse>> createUser(@Valid @RequestBody UserCreateRequest req) {
-
         return ResponseEntity.ok(
                 ApiResponse.<UserResponse>builder()
                 .status(200)
@@ -39,7 +41,6 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<AuthResponse>> login(@RequestBody LoginRequest req) {
-
         return ResponseEntity.ok(
                 ApiResponse.<AuthResponse>builder()
                         .status(200)

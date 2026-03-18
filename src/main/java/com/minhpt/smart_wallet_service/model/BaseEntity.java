@@ -37,12 +37,17 @@ public abstract class BaseEntity {
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
 
-        AuthenticationUtil authUtil = SpringContextHolder.getBean(AuthenticationUtil.class);
-        String username = authUtil.getCurrentUser().getUsername();
-        this.setCreatedBy(username != null ? username : Constant.USER_DEFAULT);
-        this.setUpdatedBy(username != null ? username : Constant.USER_DEFAULT);
+//        AuthenticationUtil authUtil = SpringContextHolder.getBean(AuthenticationUtil.class);
+        String username = Constant.USER_DEFAULT;
+//
+//        if (authUtil != null && authUtil.getCurrentUser() != null) {
+//            username = authUtil.getCurrentUser().getUsername();
+//        }
+//
+        this.setCreatedBy(username);
+        this.setUpdatedBy(username);
 
-        this.status = 1;
+        this.status = Constant.NOT_DELETE;
     }
 
     @PreUpdate
@@ -50,8 +55,14 @@ public abstract class BaseEntity {
 
         this.updatedAt = LocalDateTime.now();
 
-        AuthenticationUtil authUtil = SpringContextHolder.getBean(AuthenticationUtil.class);
-        String username = authUtil.getCurrentUser().getUsername();
-        this.setUpdatedBy(username != null ? username : Constant.USER_DEFAULT);
+//        AuthenticationUtil authUtil = SpringContextHolder.getBean(AuthenticationUtil.class);
+//
+//        String username = Constant.USER_DEFAULT;
+//
+//        if (authUtil != null && authUtil.getCurrentUser() != null) {
+//            username = authUtil.getCurrentUser().getUsername();
+//        }
+//
+//        this.setUpdatedBy(username);
     }
 }

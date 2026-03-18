@@ -13,6 +13,15 @@ spring:
       ddl-auto: update
     show-sql: true
 
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: vuhoaianh38@gmail.com
+    password: jnlb iluy cltk xwix
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+
 jwt:
   secret: smart-wallet-secret-key-smart-wallet-smart-wallet
   expiration: 900000
