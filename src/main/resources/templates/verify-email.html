@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Xác thực email</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f4f6f8;font-family:Arial,sans-serif;">
+<div style="max-width:600px;margin:40px auto;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 18px rgba(0,0,0,0.08);">
+
+    <div style="background:linear-gradient(135deg,#2563eb,#1e40af);color:white;text-align:center;padding:32px 24px;">
+        <h1 style="margin:0;font-size:26px;">Xác thực email của bạn</h1>
+    </div>
+
+    <div style="padding:32px 24px;color:#333;line-height:1.6;">
+        <p>Chào bạn,</p>
+        <p>Cảm ơn bạn đã đăng ký tài khoản.</p>
+        <p>Vui lòng nhấn vào nút bên dưới để xác thực email:</p>
+
+        <div style="text-align:center;margin:32px 0;">
+            <a href="{{VERIFY_LINK}}"
+               style="display:inline-block;background-color:#2563eb;color:#ffffff;text-decoration:none;padding:14px 28px;border-radius:8px;font-size:16px;font-weight:bold;">
+                Xác thực email
+            </a>
+        </div>
+
+        <p>Nếu nút không hoạt động, hãy copy link bên dưới vào trình duyệt:</p>
+
+        <div style="word-break:break-all;background:#f8fafc;padding:12px;border-radius:8px;font-size:14px;color:#475569;">
+            {{VERIFY_LINK}}
+        </div>
+
+        <p style="margin-top:24px;">Nếu bạn không thực hiện đăng ký, hãy bỏ qua email này.</p>
+    </div>
+
+    <div style="background-color:#f8fafc;text-align:center;font-size:13px;color:#64748b;padding:20px;">
+        © 2026 Smart Wallet Service
+    </div>
+</div>
+</body>
+</html>
