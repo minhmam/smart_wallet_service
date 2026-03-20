@@ -5,6 +5,7 @@ import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Locale;
 
 public class DataUtil {
     public static LocalDateTime parseToLocalDateTime(Object value) {
@@ -36,5 +37,12 @@ public class DataUtil {
         }
 
         return null;
+    }
+
+    public static String normalize(String data) {
+        if (data == null || data.trim().isEmpty()) {
+            throw new RuntimeException(data + " must be required");
+        }
+        return data.trim().toUpperCase(Locale.ROOT);
     }
 }

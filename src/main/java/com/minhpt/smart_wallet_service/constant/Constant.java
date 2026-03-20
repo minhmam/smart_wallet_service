@@ -9,4 +9,8 @@ public class Constant {
     public static final int NOT_VERIFIED = 0;
     public static final int USED = 1;
     public static final int NOT_USED = 0;
+    public static final String ACTIVE = "ACTIVE";
+    public static final String VNPAY = "VNPAY";
+    public static final String MOMO = "MOMO";
+
 }

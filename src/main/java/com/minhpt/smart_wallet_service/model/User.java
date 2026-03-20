@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "users")
 @Data
@@ -49,5 +51,4 @@ public class User extends BaseEntity {
 
     @Column(name = "is_email_verified")
     private int isEmailVerified;
-
 }

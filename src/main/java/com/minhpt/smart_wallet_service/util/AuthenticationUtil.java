@@ -8,10 +8,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 @Service
-@RequiredArgsConstructor
 public class AuthenticationUtil {
-    private final UserRepository userRepository;
-
     public User getCurrentUser() {
 
         Authentication authentication =

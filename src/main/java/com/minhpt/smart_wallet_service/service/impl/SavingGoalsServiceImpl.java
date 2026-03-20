@@ -5,7 +5,7 @@ import com.minhpt.smart_wallet_service.dto.request.SavingGoalsCreateRequest;
 import com.minhpt.smart_wallet_service.dto.request.SavingGoalsSearchRequest;
 import com.minhpt.smart_wallet_service.dto.response.SavingGoalsResponse;
 import com.minhpt.smart_wallet_service.mapper.SavingGoalsMapper;
-import com.minhpt.smart_wallet_service.model.SavingGoals;
+import com.minhpt.smart_wallet_service.model.SavingGoal;
 import com.minhpt.smart_wallet_service.repository.SavingGoalsRepository;
 import com.minhpt.smart_wallet_service.service.SavingGoalsService;
 import com.minhpt.smart_wallet_service.util.AuthenticationUtil;
@@ -26,24 +26,24 @@ public class SavingGoalsServiceImpl implements SavingGoalsService {
     @Override
     public SavingGoalsResponse create(SavingGoalsCreateRequest req) {
 
-        SavingGoals savingGoals = savingGoalsMapper.toEntity(req);
+        SavingGoal savingGoal = savingGoalsMapper.toEntity(req);
 
-        savingGoalsRepository.save(savingGoals);
+        savingGoalsRepository.save(savingGoal);
 
-        return savingGoalsMapper.toResponse(savingGoals);
+        return savingGoalsMapper.toResponse(savingGoal);
     }
 
     @Override
     public SavingGoalsResponse update(SavingGoalsCreateRequest req, Long id) {
 
-        SavingGoals updateSavingGoals = savingGoalsRepository.findByIdAndStatus(id, Constant.NOT_DELETE)
+        SavingGoal updateSavingGoal = savingGoalsRepository.findByIdAndStatus(id, Constant.NOT_DELETE)
                 .orElseThrow(() -> new RuntimeException("Saving Goals not found by ID = " + id));
 
-        savingGoalsMapper.update(updateSavingGoals, req);
+        savingGoalsMapper.update(updateSavingGoal, req);
 
-        savingGoalsRepository.save(updateSavingGoals);
+        savingGoalsRepository.save(updateSavingGoal);
 
-        return savingGoalsMapper.toResponse(updateSavingGoals);
+        return savingGoalsMapper.toResponse(updateSavingGoal);
     }
 
     @Override
@@ -51,26 +51,26 @@ public class SavingGoalsServiceImpl implements SavingGoalsService {
 
         String username = authenticationUtil.getCurrentUser().getUsername();
 
-        List<SavingGoals> savingGoalsList = savingGoalsRepository.findAllByCreatedByAndStatus(username, Constant.NOT_DELETE);
+        List<SavingGoal> savingGoalList = savingGoalsRepository.findAllByCreatedByAndStatus(username, Constant.NOT_DELETE);
 
-        return  savingGoalsMapper.toListResponse(savingGoalsList);
+        return  savingGoalsMapper.toListResponse(savingGoalList);
     }
 
     @Override
     public SavingGoalsResponse getDetails(Long id) {
 
-        SavingGoals savingGoals = savingGoalsRepository.findByIdAndStatus(id, Constant.NOT_DELETE)
+        SavingGoal savingGoal = savingGoalsRepository.findByIdAndStatus(id, Constant.NOT_DELETE)
                 .orElseThrow(() -> new RuntimeException("Saving Goals not found by ID = " + id));
 
-        return savingGoalsMapper.toResponse(savingGoals);
+        return savingGoalsMapper.toResponse(savingGoal);
     }
 
     @Override
     public void delete(Long id) {
-        SavingGoals deleteSavingGoals = savingGoalsRepository.findByIdAndStatus(id, Constant.NOT_DELETE)
+        SavingGoal deleteSavingGoal = savingGoalsRepository.findByIdAndStatus(id, Constant.NOT_DELETE)
                 .orElseThrow(() -> new RuntimeException("Saving Goals not found by ID = " + id));
-        deleteSavingGoals.setStatus(Constant.DELETED);
-        savingGoalsRepository.save(deleteSavingGoals);
+        deleteSavingGoal.setStatus(Constant.DELETED);
+        savingGoalsRepository.save(deleteSavingGoal);
     }
 
     @Override

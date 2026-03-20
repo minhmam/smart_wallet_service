@@ -2,7 +2,6 @@ package com.minhpt.smart_wallet_service.repository.impl;
 
 import com.minhpt.smart_wallet_service.dto.request.SavingGoalsSearchRequest;
 import com.minhpt.smart_wallet_service.dto.response.SavingGoalsResponse;
-import com.minhpt.smart_wallet_service.model.SavingGoals;
 import com.minhpt.smart_wallet_service.repository.SavingGoalsRepositoryCustom;
 import com.minhpt.smart_wallet_service.util.AuthenticationUtil;
 import com.minhpt.smart_wallet_service.util.DataUtil;

@@ -25,3 +25,9 @@ spring:
 jwt:
   secret: smart-wallet-secret-key-smart-wallet-smart-wallet
   expiration: 900000
+
+vnpay:
+  tmnCode: T8I9WSZS
+  secretKey: 1G49FUKT7DZRYKB6J0JW7R6BCZ9ESMO5
+  payUrl: https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
+  returnUrl: https://afa4-14-160-26-144.ngrok-free.app/api/v1/payment-transaction/vnpay-return
