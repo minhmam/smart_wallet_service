@@ -26,8 +26,35 @@ jwt:
   secret: smart-wallet-secret-key-smart-wallet-smart-wallet
   expiration: 900000
 
+app:
+  baseUrl: https://2ca6-14-160-26-144.ngrok-free.app
+
 vnpay:
   tmnCode: T8I9WSZS
   secretKey: 1G49FUKT7DZRYKB6J0JW7R6BCZ9ESMO5
   payUrl: https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
-  returnUrl: https://afa4-14-160-26-144.ngrok-free.app/api/v1/payment-transaction/vnpay-return
+  returnUrl: ${app.baseUrl}/api/v1/payment-transaction/vnpay-return
+  ipnUrl: ${app.baseUrl}/api/v1/payment-transaction/vnpay-ipn
+
+  version: 2.1.0
+  command: pay
+  currCode: VND
+  locale: vn
+  orderType: other
+  orderInfo: Nang cap prenium
+
+  successCode: "00"
+
+  ipnResponseCodeHandled: "00"
+  ipnResponseCodeInvalidRequest: "99"
+  ipnResponseCodeInvalidChecksum: "97"
+
+  ipnMessageConfirmSuccess: Confirm Success
+  ipnMessageConfirmFailed: Confirm Failed
+  ipnMessageInvalidRequest: Invalid request
+  ipnMessageInvalidChecksum: Invalid Checksum
+
+  returnMessageSuccess: Payment success
+  returnMessageFailed: Payment failed
+  returnMessageInvalidRequest: Invalid request
+  returnMessageInvalidChecksum: Invalid checksum

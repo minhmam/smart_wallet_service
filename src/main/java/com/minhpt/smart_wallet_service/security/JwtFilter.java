@@ -25,9 +25,11 @@ public class JwtFilter extends OncePerRequestFilter {
     private final UserRepository userRepository;
 
     @Override
-    protected boolean shouldNotFilter(HttpServletRequest request){
+    protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getServletPath();
         return path.startsWith("/auth/")
+                || path.equals("/api/v1/payment-transaction/vnpay-return")
+                || path.equals("/api/v1/payment-transaction/vnpay-ipn")
                 || path.startsWith("/swagger-ui/")
                 || path.startsWith("/v3/api-docs/");
     }

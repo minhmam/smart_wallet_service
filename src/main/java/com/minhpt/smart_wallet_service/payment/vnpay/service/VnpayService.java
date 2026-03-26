@@ -8,7 +8,9 @@ public interface VnpayService {
 
     String createPaymentUrl(PaymentTransaction transaction, String ipAddress);
 
-    boolean verifyReturn(Map<String, String> params);
+    String handleReturn(Map<String, String> params);
 
-    boolean verifyIpn(Map<String, String> params);
+    String handleIpn(Map<String, String> params);
+
+    boolean verifySignature(Map<String, String> params);
 }

@@ -12,5 +12,8 @@ public class Constant {
     public static final String ACTIVE = "ACTIVE";
     public static final String VNPAY = "VNPAY";
     public static final String MOMO = "MOMO";
+    public static final String STATE_PENDING = "PENDING";
+    public static final String STATE_SUCCESS = "SUCCESS";
+    public static final String STATE_FAILED = "FAILED";
 
 }

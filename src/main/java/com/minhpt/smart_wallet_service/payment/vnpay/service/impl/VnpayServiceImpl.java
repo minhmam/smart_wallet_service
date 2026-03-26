@@ -17,82 +17,125 @@ import java.util.*;
 @RequiredArgsConstructor
 public class VnpayServiceImpl implements VnpayService {
 
+    private static final String VNP_SECURE_HASH = "vnp_SecureHash";
+    private static final String VNP_SECURE_HASH_TYPE = "vnp_SecureHashType";
+    private static final String VNP_RESPONSE_CODE = "vnp_ResponseCode";
+    private static final String VNP_TRANSACTION_STATUS = "vnp_TransactionStatus";
+
     private final VnpayConfig vnpayConfig;
 
     @Override
     public String createPaymentUrl(PaymentTransaction tx, String ipAddress) {
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
         Map<String, String> params = new HashMap<>();
 
-        params.put("vnp_Version", "2.1.0");
-        params.put("vnp_Command", "pay");
+        params.put("vnp_Version", vnpayConfig.getVersion());
+        params.put("vnp_Command", vnpayConfig.getCommand());
         params.put("vnp_TmnCode", vnpayConfig.getTmnCode());
-        params.put("vnp_Amount", String.valueOf(tx.getAmount() * 100));
-        params.put("vnp_CurrCode", "VND");
+        params.put("vnp_Amount", String.valueOf(tx.getAmount() * 100L));
+        params.put("vnp_CurrCode", vnpayConfig.getCurrCode());
         params.put("vnp_TxnRef", tx.getOrderCode());
-        params.put("vnp_OrderInfo", "Thanh toan goi");
-        params.put("vnp_OrderType", "other");
-        params.put("vnp_Locale", "vn");
+        params.put("vnp_OrderInfo", vnpayConfig.getOrderInfo());
+        params.put("vnp_OrderType", vnpayConfig.getOrderType());
+        params.put("vnp_Locale", vnpayConfig.getLocale());
         params.put("vnp_ReturnUrl", vnpayConfig.getReturnUrl());
         params.put("vnp_IpAddr", ipAddress);
-        params.put("vnp_CreateDate",
-                DateTimeFormatter.ofPattern("yyyyMMddHHmmss")
-                        .format(LocalDateTime.now())
-        );
+        params.put("vnp_CreateDate", formatter.format(now));
+        params.put("vnp_ExpireDate", formatter.format(now.plusMinutes(15)));
 
-        List<String> fieldNames = new ArrayList<>(params.keySet());
-        Collections.sort(fieldNames);
-
-        StringBuilder hashData = new StringBuilder();
-        StringBuilder query = new StringBuilder();
-
-        for (String fieldName : fieldNames) {
-            String fieldValue = params.get(fieldName);
-            if (fieldValue == null || fieldValue.isEmpty()) {
-                continue;
-            }
-
-            String encodedFieldName = URLEncoder.encode(fieldName, StandardCharsets.UTF_8);
-            String encodedFieldValue = URLEncoder.encode(fieldValue, StandardCharsets.UTF_8);
-
-            hashData.append(encodedFieldName)
-                    .append("=")
-                    .append(encodedFieldValue)
-                    .append("&");
-
-            query.append(encodedFieldName)
-                    .append("=")
-                    .append(encodedFieldValue)
-                    .append("&");
-        }
-
-        if (hashData.length() > 0) {
-            hashData.setLength(hashData.length() - 1);
-        }
-        if (query.length() > 0) {
-            query.setLength(query.length() - 1);
-        }
-
-        String secureHash = VnpayUtil.hmacSHA512(
-                vnpayConfig.getSecretKey(),
-                hashData.toString()
-        );
+        String query = buildQueryData(params);
+        String secureHash = VnpayUtil.hmacSHA512(vnpayConfig.getSecretKey(), query);
 
         return vnpayConfig.getPayUrl()
                 + "?"
                 + query
-                + "&vnp_SecureHash="
+                + "&"
+                + VNP_SECURE_HASH
+                + "="
                 + secureHash;
     }
 
     @Override
-    public boolean verifyReturn(Map<String, String> params) {
-        String vnpSecureHash = params.remove("vnp_SecureHash");
-        params.remove("vnp_SecureHashType");
+    public String handleReturn(Map<String, String> params) {
+        if (params == null || params.isEmpty()) {
+            return vnpayConfig.getReturnMessageInvalidRequest();
+        }
 
+        if (!verifySignature(params)) {
+            return vnpayConfig.getReturnMessageInvalidChecksum();
+        }
+
+        if (isSuccessResponse(params)) {
+            return vnpayConfig.getReturnMessageSuccess();
+        }
+
+        return vnpayConfig.getReturnMessageFailed();
+    }
+
+    @Override
+    public String handleIpn(Map<String, String> params) {
+        if (params == null || params.isEmpty()) {
+            return buildIpnResponse(
+                    vnpayConfig.getIpnResponseCodeInvalidRequest(),
+                    vnpayConfig.getIpnMessageInvalidRequest()
+            );
+        }
+
+        if (!verifySignature(params)) {
+            return buildIpnResponse(
+                    vnpayConfig.getIpnResponseCodeInvalidChecksum(),
+                    vnpayConfig.getIpnMessageInvalidChecksum()
+            );
+        }
+
+        if (isSuccessResponse(params)) {
+            return buildIpnResponse(
+                    vnpayConfig.getIpnResponseCodeHandled(),
+                    vnpayConfig.getIpnMessageConfirmSuccess()
+            );
+        }
+
+        return buildIpnResponse(
+                vnpayConfig.getIpnResponseCodeHandled(),
+                vnpayConfig.getIpnMessageConfirmFailed()
+        );
+    }
+
+    @Override
+    public boolean verifySignature(Map<String, String> params) {
+        if (params == null || params.isEmpty()) {
+            return false;
+        }
+
+        String vnpSecureHash = params.get(VNP_SECURE_HASH);
+        if (vnpSecureHash == null || vnpSecureHash.isBlank()) {
+            return false;
+        }
+
+        Map<String, String> clonedParams = new HashMap<>(params);
+        clonedParams.remove(VNP_SECURE_HASH);
+        clonedParams.remove(VNP_SECURE_HASH_TYPE);
+
+        String hashData = buildQueryData(clonedParams);
+        String signValue = VnpayUtil.hmacSHA512(vnpayConfig.getSecretKey(), hashData);
+
+        return signValue.equals(vnpSecureHash);
+    }
+
+    private boolean isSuccessResponse(Map<String, String> params) {
+        String responseCode = params.get(VNP_RESPONSE_CODE);
+        String transactionStatus = params.get(VNP_TRANSACTION_STATUS);
+
+        return vnpayConfig.getSuccessCode().equals(responseCode)
+                && vnpayConfig.getSuccessCode().equals(transactionStatus);
+    }
+
+    private String buildQueryData(Map<String, String> params) {
         List<String> fieldNames = new ArrayList<>(params.keySet());
         Collections.sort(fieldNames);
 
-        StringBuilder hashData = new StringBuilder();
+        StringBuilder data = new StringBuilder();
 
         for (String fieldName : fieldNames) {
             String fieldValue = params.get(fieldName);
@@ -103,26 +146,21 @@ public class VnpayServiceImpl implements VnpayService {
             String encodedFieldName = URLEncoder.encode(fieldName, StandardCharsets.UTF_8);
             String encodedFieldValue = URLEncoder.encode(fieldValue, StandardCharsets.UTF_8);
 
-            hashData.append(encodedFieldName)
+            data.append(encodedFieldName)
                     .append("=")
                     .append(encodedFieldValue)
                     .append("&");
         }
 
-        if (hashData.length() > 0) {
-            hashData.setLength(hashData.length() - 1);
+        if (data.length() > 0) {
+            data.setLength(data.length() - 1);
         }
 
-        String calculatedHash = VnpayUtil.hmacSHA512(
-                vnpayConfig.getSecretKey(),
-                hashData.toString()
-        );
-
-        return calculatedHash.equals(vnpSecureHash);
+        return data.toString();
     }
 
-    @Override
-    public boolean verifyIpn(Map<String, String> params) {
-        return verifyReturn(params);
+    private String buildIpnResponse(String rspCode, String message) {
+        return "{\"RspCode\":\"" + rspCode + "\",\"Message\":\"" + message + "\"}";
     }
+
 }

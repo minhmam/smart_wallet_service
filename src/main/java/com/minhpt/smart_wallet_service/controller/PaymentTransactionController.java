@@ -9,12 +9,12 @@ import com.minhpt.smart_wallet_service.util.IpUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
-
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/payment-transaction")
 @RequiredArgsConstructor
@@ -35,9 +35,9 @@ public class PaymentTransactionController {
     }
 
     @GetMapping("/vnpay-return")
-    public ResponseEntity<ApiResponse<String>> vnpayReturn(@RequestParam Map<String, String> params) {
+    public ResponseEntity<ApiResponse<String>> vnpayReturn(HttpServletRequest request) {
 
-        String message = paymentTransactionService.handleVnpayReturn(params);
+        String message = paymentTransactionService.handleVnpayReturn(request);
 
         return ResponseEntity.ok(
                 ApiResponse.<String>builder()
@@ -46,5 +46,11 @@ public class PaymentTransactionController {
                         .data(message)
                         .build()
         );
+    }
+
+    @GetMapping("/vnpay-ipn")
+    public ResponseEntity<String> vnpayIpn(HttpServletRequest request) {
+        log.info("IPN call from VNPAY");
+        return ResponseEntity.ok(paymentTransactionService.handleVnpayIpn(request));
     }
 }
