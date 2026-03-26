@@ -7,7 +7,6 @@ import com.minhpt.smart_wallet_service.mapper.PaymentTransactionMapper;
 import com.minhpt.smart_wallet_service.model.PaymentTransaction;
 import com.minhpt.smart_wallet_service.model.SubscriptionPlan;
 import com.minhpt.smart_wallet_service.model.User;
-import com.minhpt.smart_wallet_service.payment.vnpay.config.VnpayConfig;
 import com.minhpt.smart_wallet_service.payment.vnpay.service.VnpayService;
 import com.minhpt.smart_wallet_service.repository.PaymentTransactionRepository;
 import com.minhpt.smart_wallet_service.repository.SubscriptionPlanRepository;
@@ -25,7 +24,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
