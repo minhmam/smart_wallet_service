@@ -34,6 +34,7 @@ public class UserServiceImpl implements UserService {
         user.setPassword(passwordEncoder.encode(req.getPassword()));
         user.setRole("USER");
         user.setIsEmailVerified(Constant.NOT_VERIFIED);
+        user.setPremiumStatus(Constant.NOT_PREMIUM);
 
         User savedUser = userRepository.save(user);
 

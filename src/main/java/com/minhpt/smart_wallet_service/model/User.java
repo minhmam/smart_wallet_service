@@ -51,4 +51,11 @@ public class User extends BaseEntity {
 
     @Column(name = "is_email_verified")
     private int isEmailVerified;
+
+    @Column(name = "premium_status")
+    private int premiumStatus;
+
+    @Column(name = "premium_expired_at")
+    private LocalDateTime premiumExpiredAt;
+
 }
