@@ -58,3 +58,5 @@ vnpay:
   returnMessageFailed: Payment failed
   returnMessageInvalidRequest: Invalid request
   returnMessageInvalidChecksum: Invalid checksum
+openAi:
+  api-key: ${OPENAI_API_KEY:sk-}
