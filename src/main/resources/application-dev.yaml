@@ -24,7 +24,7 @@ spring:
 
 jwt:
   secret: smart-wallet-secret-key-smart-wallet-smart-wallet
-  expiration: 900000
+  expiration: 36000000
 
 app:
   baseUrl: https://2ca6-14-160-26-144.ngrok-free.app

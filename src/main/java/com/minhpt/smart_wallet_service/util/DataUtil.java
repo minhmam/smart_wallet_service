@@ -5,6 +5,7 @@ import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
 public class DataUtil {
@@ -37,6 +38,13 @@ public class DataUtil {
         }
 
         return null;
+    }
+
+    public static LocalDateTime parsePayDate(String payDate) {
+        return LocalDateTime.parse(
+                payDate,
+                DateTimeFormatter.ofPattern("yyyyMMddHHmmss")
+        );
     }
 
     public static String normalize(String data) {

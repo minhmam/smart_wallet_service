@@ -7,20 +7,23 @@ import com.minhpt.smart_wallet_service.mapper.PaymentTransactionMapper;
 import com.minhpt.smart_wallet_service.model.PaymentTransaction;
 import com.minhpt.smart_wallet_service.model.SubscriptionPlan;
 import com.minhpt.smart_wallet_service.model.User;
+import com.minhpt.smart_wallet_service.model.UserSubscription;
 import com.minhpt.smart_wallet_service.payment.vnpay.service.VnpayService;
 import com.minhpt.smart_wallet_service.repository.PaymentTransactionRepository;
 import com.minhpt.smart_wallet_service.repository.SubscriptionPlanRepository;
+import com.minhpt.smart_wallet_service.repository.UserRepository;
+import com.minhpt.smart_wallet_service.repository.UserSubscriptionRepository;
 import com.minhpt.smart_wallet_service.service.PaymentTransactionService;
 import com.minhpt.smart_wallet_service.util.AuthenticationUtil;
 import com.minhpt.smart_wallet_service.util.DataUtil;
 import com.minhpt.smart_wallet_service.util.PaymentUtil;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
@@ -35,6 +38,8 @@ public class PaymentTransactionServiceImpl implements PaymentTransactionService 
     private final PaymentTransactionMapper paymentTransactionMapper;
     private final AuthenticationUtil authenticationUtil;
     private final VnpayService vnpayService;
+    private final UserSubscriptionRepository userSubscriptionRepository;
+    private final UserRepository userRepository;
 
     @Override
     public PaymentTransactionResponse create(CreatePaymentTransactionRequest req, String ipAddress) {
@@ -87,6 +92,7 @@ public class PaymentTransactionServiceImpl implements PaymentTransactionService 
     }
 
     @Override
+    @Transactional
     public String handleVnpayIpn(HttpServletRequest request) {
         Map<String, String> params = getRequestParams(request);
 
@@ -126,7 +132,7 @@ public class PaymentTransactionServiceImpl implements PaymentTransactionService 
 
         PaymentTransaction transaction = paymentTransactionRepository.findByOrderCode(orderCode)
                 .orElseThrow(() -> new RuntimeException(
-                        "Không tìm thấy giao dịch với orderCode: " + orderCode
+                        "Transaction not found for orderCode: " + orderCode
                 ));
 
         if (!Constant.STATE_PENDING.equalsIgnoreCase(transaction.getState())) {
@@ -158,13 +164,52 @@ public class PaymentTransactionServiceImpl implements PaymentTransactionService 
 
             String payDate = params.get("vnp_PayDate");
             if (payDate != null && !payDate.isBlank()) {
-                transaction.setPaidAt(parsePayDate(payDate));
+                transaction.setPaidAt(DataUtil.parsePayDate(payDate));
             }
         } else {
             transaction.setState(Constant.STATE_FAILED);
         }
 
         paymentTransactionRepository.save(transaction);
+
+        //Bắt đầu lưu Usersubscription
+//        createUserSubscriptionAndUpgradeUser(transaction);
+    }
+
+    private void createUserSubscriptionAndUpgradeUser(PaymentTransaction paymentTransaction){
+        if(paymentTransaction == null){
+            throw new RuntimeException("Không tìm thấy khoản thanh toán nào hợp lệ");
+        }
+
+//        if(userSubscriptionRepository.exitsByPaymentTransactionId(paymentTransaction.getId())){
+//            throw new RuntimeException("Đã tồn tại user subscription này rồi");
+//        }
+
+        if(!Constant.STATE_SUCCESS.equalsIgnoreCase(paymentTransaction.getState())){
+            throw new RuntimeException("Chưa hoàn tất giao dịch với mã order thanh toán: " + paymentTransaction.getOrderCode());
+        }
+
+        User user = paymentTransaction.getUser();
+        SubscriptionPlan subscriptionPlan = paymentTransaction.getSubscriptionPlan();
+
+        LocalDateTime startDate = paymentTransaction.getPaidAt() != null ? paymentTransaction.getPaidAt() : LocalDateTime.now();
+        LocalDateTime endDate = startDate.plusDays(subscriptionPlan.getDurationDays());
+
+        UserSubscription userSubscription = UserSubscription.builder()
+                .user(user)
+                .subscriptionPlan(subscriptionPlan)
+                .paymentTransaction(paymentTransaction)
+                .startDate(startDate)
+                .endDate(endDate)
+                .state(Constant.ACTIVE)
+                .build();
+
+        userSubscriptionRepository.save(userSubscription);
+
+        user.setPremiumStatus(Constant.PREMIUM);
+        user.setPremiumExpiredAt(endDate);
+
+        userRepository.save(user);
     }
 
     private boolean isSuccessResponse(Map<String, String> params) {
@@ -188,13 +233,6 @@ public class PaymentTransactionServiceImpl implements PaymentTransactionService 
         }
 
         return fields;
-    }
-
-    private LocalDateTime parsePayDate(String payDate) {
-        return LocalDateTime.parse(
-                payDate,
-                DateTimeFormatter.ofPattern("yyyyMMddHHmmss")
-        );
     }
 
     private String buildRawResponse(Map<String, String> fields) {

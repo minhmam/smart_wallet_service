@@ -1,6 +1,5 @@
 package com.minhpt.smart_wallet_service.model;
 
-import com.minhpt.smart_wallet_service.constant.Constant;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -51,10 +50,6 @@ public class UserSubscription extends BaseEntity{
 
     @Column(name = "state", length = 50)
     private String state;
-
-    public void prePersist(){
-        this.state = Constant.ACTIVE;
-    }
 
 }
 
