@@ -34,7 +34,7 @@ public class CategoryRepositoryCustomImpl implements CategoryRepositoryCustom {
         int size = request.getSize();
 
         StringBuilder sql = new StringBuilder("""
-                SELECT name, type, icon
+                SELECT id, name, type, icon, color
                 FROM categories
                 WHERE status = 1
                 """);
@@ -71,11 +71,11 @@ public class CategoryRepositoryCustomImpl implements CategoryRepositoryCustom {
         if (result != null && !result.isEmpty()) {
             for (Object[] item : result) {
                 CategoryResponse response = new CategoryResponse();
-
-                response.setName(item[0] != null ? item[0].toString() : null);
-                response.setType(item[1] != null ? item[1].toString() : null);
-                response.setIcon(item[2] != null ? item[2].toString() : null);
-
+                response.setId(item[0] != null ? (Long) item[0] : null);
+                response.setName(item[1] != null ? item[1].toString() : null);
+                response.setType(item[2] != null ? item[2].toString() : null);
+                response.setIcon(item[3] != null ? item[3].toString() : null);
+                response.setIcon(item[4] != null ? item[4].toString() : null);
                 categories.add(response);
             }
         }

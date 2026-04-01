@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
@@ -17,7 +18,7 @@ public class TransactionCreateRequest {
 
     @NotNull(message = "Amount is required")
     @Positive(message = "Amount must be greater than 0")
-    private Double amount;
+    private BigDecimal amount;
 
     @NotBlank(message = "Type is required")
     @Pattern(
@@ -31,9 +32,6 @@ public class TransactionCreateRequest {
 
     @NotNull(message = "Category is required")
     private Long categoryId;
-
-    @NotNull(message = "User ID is required")
-    private Long userId;
 
     @NotNull(message = "Transaction date is required")
     @PastOrPresent(message = "Transantion date cannot be in the future")

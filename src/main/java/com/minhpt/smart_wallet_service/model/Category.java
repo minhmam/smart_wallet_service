@@ -35,4 +35,7 @@ public class Category extends BaseEntity {
 
     @Column(name = "pin")
     private int pin;
+
+    @Column(name = "color")
+    private String color;
 }

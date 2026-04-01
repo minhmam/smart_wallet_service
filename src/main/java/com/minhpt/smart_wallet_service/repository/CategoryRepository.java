@@ -12,4 +12,6 @@ public interface CategoryRepository extends JpaRepository<Category, Long>, Categ
     List<Category> findAllByCreatedBy(String username);
 
     Optional<Category> findByIdAndStatus(Long id, int status);
+
+    List<Category> findAllByTypeAndCreatedByAndStatus(String type, String createdBy, int status);
 }

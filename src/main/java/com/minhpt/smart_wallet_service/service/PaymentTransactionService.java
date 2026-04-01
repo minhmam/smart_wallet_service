@@ -4,12 +4,13 @@ import com.minhpt.smart_wallet_service.dto.request.CreatePaymentTransactionReque
 import com.minhpt.smart_wallet_service.dto.response.PaymentTransactionResponse;
 import jakarta.servlet.http.HttpServletRequest;
 
-import java.util.Map;
-
 public interface PaymentTransactionService {
     PaymentTransactionResponse create(CreatePaymentTransactionRequest request, String ipAddress);
 
     String handleVnpayReturn(HttpServletRequest request);
 
     String handleVnpayIpn(HttpServletRequest request);
+
+    PaymentTransactionResponse getDetails(Long id);
+
 }

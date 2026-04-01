@@ -17,6 +17,8 @@ public interface CategoryService {
 
     List<CategoryResponse> getAll();
 
+    CategoryResponse getDetails(Long categoryId);
+
     CategoryResponse getById();
 
     void changePin(Long id);

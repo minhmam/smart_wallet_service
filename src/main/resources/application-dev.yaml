@@ -24,10 +24,10 @@ spring:
 
 jwt:
   secret: smart-wallet-secret-key-smart-wallet-smart-wallet
-  expiration: 36000000
+  expiration: 360000000000
 
 app:
-  baseUrl: https://2ca6-14-160-26-144.ngrok-free.app
+  baseUrl: https://948b-14-160-26-144.ngrok-free.app
 
 vnpay:
   tmnCode: T8I9WSZS

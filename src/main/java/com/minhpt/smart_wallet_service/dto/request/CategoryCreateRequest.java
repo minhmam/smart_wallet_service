@@ -25,4 +25,6 @@ public class CategoryCreateRequest {
 
     @NotBlank(message = "Icon is required")
     private String icon;
+
+    private String color;
 }

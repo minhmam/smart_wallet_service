@@ -3,9 +3,14 @@ package com.minhpt.smart_wallet_service.service.impl;
 import com.minhpt.smart_wallet_service.constant.Constant;
 import com.minhpt.smart_wallet_service.dto.request.TransactionCreateRequest;
 import com.minhpt.smart_wallet_service.dto.request.TransactionSearchRequest;
+import com.minhpt.smart_wallet_service.dto.response.CategoryResponse;
 import com.minhpt.smart_wallet_service.dto.response.TransactionResponse;
 import com.minhpt.smart_wallet_service.mapper.TransactionMapper;
+import com.minhpt.smart_wallet_service.model.AccountBalance;
+import com.minhpt.smart_wallet_service.model.Category;
 import com.minhpt.smart_wallet_service.model.Transaction;
+import com.minhpt.smart_wallet_service.model.User;
+import com.minhpt.smart_wallet_service.repository.AccountBalanceRepository;
 import com.minhpt.smart_wallet_service.repository.TransactionRepository;
 import com.minhpt.smart_wallet_service.service.TransactionService;
 import com.minhpt.smart_wallet_service.util.AuthenticationUtil;
@@ -22,10 +27,37 @@ public class TransactionServiceImpl implements TransactionService {
     private final TransactionRepository transactionRepository;
     private final TransactionMapper transactionMapper;
     private final AuthenticationUtil authenticationUtil;
+    private final AccountBalanceRepository accountBalanceRepository;
 
     @Override
     public TransactionResponse create(TransactionCreateRequest req) {
+
+        //Lấy user
+        User loginUser = authenticationUtil.getCurrentUser();
+
+        if(loginUser == null){
+            throw new RuntimeException("Chưa có user nào login cả");
+        }
+
+        //Cập nhật Transaciton
         Transaction transaction = transactionMapper.toEntity(req);
+        transaction.setCreatedBy(loginUser.getUsername());
+        transaction.setUpdatedBy(loginUser.getUsername());
+        transaction.setUserId(loginUser.getId());
+
+        //Cập nhật account balance
+        AccountBalance accountBalance = accountBalanceRepository.findByUserId(loginUser.getId())
+                .orElseThrow(() -> new RuntimeException("Tài khoản không có thanh khoản"));
+
+        if(transaction.getType().equals("EXPENSE")){
+            accountBalance.setBalance(accountBalance.getBalance().subtract(transaction.getAmount()));
+            accountBalanceRepository.save(accountBalance);
+        }
+
+        if(transaction.getType().equals("INCOME")){
+            accountBalance.setBalance(accountBalance.getBalance().add(transaction.getAmount()));
+            accountBalanceRepository.save(accountBalance);
+        }
 
         return transactionMapper.toResponse(transactionRepository.save(transaction));
     }
@@ -91,5 +123,16 @@ public class TransactionServiceImpl implements TransactionService {
 
         deleteTransaction.setStatus(Constant.DELETED);
         transactionRepository.save(deleteTransaction);
+    }
+
+    @Override
+    public List<TransactionResponse> findByType(String type) {
+        User loginUser = authenticationUtil.getCurrentUser();
+        if(loginUser == null){
+            throw new RuntimeException("Chưa có user đăng nhập vào hệ thống");
+        }
+        List<Transaction> transactionList = transactionRepository.findByTypeAndUserIdAndStatus(type, loginUser.getId(), Constant.NOT_DELETE);
+
+        return transactionMapper.toListResponse(transactionList);
     }
 }

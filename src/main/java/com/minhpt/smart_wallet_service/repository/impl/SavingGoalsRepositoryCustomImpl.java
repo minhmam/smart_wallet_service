@@ -15,6 +15,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.ObjectUtils;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,10 +36,13 @@ public class SavingGoalsRepositoryCustomImpl implements SavingGoalsRepositoryCus
         int size = req.getSize();
 
         StringBuilder sql = new StringBuilder("select " +
+                "sg.id , " +
                 "sg.name , " +
                 "sg.target_amount , " +
                 "sg.current_amount , " +
                 "sg.deadline, " +
+                "sg.icon, " +
+                "sg.color " +
                 "from " +
                 "saving_goals sg " +
                 "where " +
@@ -77,10 +81,13 @@ public class SavingGoalsRepositoryCustomImpl implements SavingGoalsRepositoryCus
         for(Object[] item : result){
 
             SavingGoalsResponse response = SavingGoalsResponse.builder()
-                    .name(item[0] != null ? item[0].toString() : null)
-                    .targetAmount(item[1] != null ? ((Number) item[1]).doubleValue() : null)
-                    .currentAmount(item[2] != null? ((Number) item[2]).doubleValue() : null)
-                    .deadline(item[3] != null? DataUtil.parseToLocalDateTime(item[3]) : null)
+                    .id(item[0] != null ? (Long) item[0] : null)
+                    .name(item[1] != null ? item[1].toString() : null)
+                    .targetAmount(item[2] != null ? new BigDecimal(item[2].toString()) : null)
+                    .currentAmount(item[3] != null ? new BigDecimal(item[3].toString()) : null)
+                    .deadline(item[4] != null? DataUtil.parseToLocalDateTime(item[3]) : null)
+                    .icon(item[5] != null ? item[5].toString() : null)
+                    .color(item[6] != null ? item[6].toString() : null)
                     .build();
 
             savingGoalsResponseList.add(response);

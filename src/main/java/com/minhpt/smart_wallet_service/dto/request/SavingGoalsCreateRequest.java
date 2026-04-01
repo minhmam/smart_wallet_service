@@ -9,6 +9,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
@@ -21,13 +22,15 @@ public class SavingGoalsCreateRequest {
 
     @NotNull(message = "Target Amount is required")
     @Positive(message = "Target Amount must be > 0")
-    private Double targetAmount;
+    private BigDecimal targetAmount;
 
     @NotNull(message = "currentAmount Amount is required")
     @Positive(message = "currentAmount Amount must be > 0")
-    private Double currentAmount;
+    private BigDecimal currentAmount;
 
     @NotNull(message = "Deadline is required")
     @FutureOrPresent(message = "Deadline is in the present or future")
     private LocalDateTime deadline;
+    private String icon;
+    private String color;
 }

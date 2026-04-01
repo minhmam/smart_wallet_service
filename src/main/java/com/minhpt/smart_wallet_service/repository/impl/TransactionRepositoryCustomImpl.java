@@ -13,6 +13,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.ObjectUtils;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,6 +43,7 @@ public class TransactionRepositoryCustomImpl implements TransactionRepositoryCus
         if (!ObjectUtils.isEmpty(req.getKeySearch())) {
             sql.append(" and (upper(t.description) like upper(:keySearch)) ");
         }
+        sql.append(" ORDER BY t.updated_at DESC ");
 
         Query query = em.createNativeQuery(sql.toString());
         Query queryCount = em.createNativeQuery("SELECT COUNT(*) FROM (" + sql.toString()+ ") as total");
@@ -60,7 +62,7 @@ public class TransactionRepositoryCustomImpl implements TransactionRepositoryCus
 
             TransactionResponse response = TransactionResponse.builder()
                     .id(item[0] != null ? ((Number) item[0]).longValue() : null)
-                    .amount(item[1] != null ? ((Number) item[1]).doubleValue() : null)
+                    .amount(item[1] != null ? new BigDecimal(item[1].toString()) : null)
                     .type(item[2] != null ? item[2].toString() : null)
                     .description(item[3] != null ? item[3].toString() : null)
                     .categoryId(item[4] != null ? ((Number) item[4]).longValue() : null)

@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -28,11 +29,17 @@ public class SavingGoal extends BaseEntity{
     private String name;
 
     @Column(name = "target_amount")
-    private Double targetAmount;
+    private BigDecimal targetAmount;
 
     @Column(name = "current_amount")
-    private Double currentAmount;
+    private BigDecimal currentAmount;
 
     @Column(name = "deadline")
     private LocalDateTime deadline;
+
+    @Column(name = "icon")
+    private String icon;
+
+    @Column(name = "color")
+    private String color;
 }

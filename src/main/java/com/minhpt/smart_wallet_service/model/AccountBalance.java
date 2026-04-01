@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 @Entity(name = "account_balance")
 @NoArgsConstructor
 @AllArgsConstructor
@@ -26,5 +28,5 @@ public class AccountBalance extends BaseEntity{
     private User user;
 
     @Column(name = "balance")
-    private Long balance;
+    private BigDecimal balance;
 }

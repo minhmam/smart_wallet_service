@@ -36,17 +36,6 @@ public abstract class BaseEntity {
 
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
-
-//        AuthenticationUtil authUtil = SpringContextHolder.getBean(AuthenticationUtil.class);
-        String username = Constant.USER_DEFAULT;
-//
-//        if (authUtil != null && authUtil.getCurrentUser() != null) {
-//            username = authUtil.getCurrentUser().getUsername();
-//        }
-//
-        this.setCreatedBy(username);
-        this.setUpdatedBy(username);
-
         this.status = Constant.NOT_DELETE;
     }
 

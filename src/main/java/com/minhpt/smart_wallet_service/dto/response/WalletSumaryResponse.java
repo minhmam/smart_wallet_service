@@ -1,6 +1,5 @@
-package com.minhpt.smart_wallet_service.dto;
+package com.minhpt.smart_wallet_service.dto.response;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -8,11 +7,12 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Data
 @Builder
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class AccountBalanceDTO {
+public class WalletSumaryResponse {
     private BigDecimal balance;
+    private BigDecimal totalIncome;
+    private BigDecimal totalExpense;
 }

@@ -105,6 +105,15 @@ public class PaymentTransactionServiceImpl implements PaymentTransactionService 
         return result;
     }
 
+    @Override
+    public PaymentTransactionResponse getDetails(Long id) {
+
+        PaymentTransaction paymentTransaction = paymentTransactionRepository.findByIdAndStatus(id, Constant.NOT_DELETE)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy giao dịch nào tương ứng với id = " + id));
+
+        return paymentTransactionMapper.toResponse(paymentTransaction);
+    }
+
     private void validateProvider(String provider) {
         if (provider == null || provider.isBlank()) {
             throw new IllegalArgumentException("Provider must not be blank");
@@ -114,7 +123,6 @@ public class PaymentTransactionServiceImpl implements PaymentTransactionService 
             throw new IllegalArgumentException("Unsupported provider: " + provider);
         }
     }
-
 
     private void processTransactionAfterCallback(Map<String, String> params) {
         if (params == null || params.isEmpty()) {
@@ -172,14 +180,10 @@ public class PaymentTransactionServiceImpl implements PaymentTransactionService 
 
         paymentTransactionRepository.save(transaction);
 
-        //Bắt đầu lưu Usersubscription
-//        createUserSubscriptionAndUpgradeUser(transaction);
+        createUserSubscriptionAndUpgradeUser(transaction);
     }
 
     private void createUserSubscriptionAndUpgradeUser(PaymentTransaction paymentTransaction){
-        if(paymentTransaction == null){
-            throw new RuntimeException("Không tìm thấy khoản thanh toán nào hợp lệ");
-        }
 
 //        if(userSubscriptionRepository.exitsByPaymentTransactionId(paymentTransaction.getId())){
 //            throw new RuntimeException("Đã tồn tại user subscription này rồi");
@@ -189,14 +193,14 @@ public class PaymentTransactionServiceImpl implements PaymentTransactionService 
             throw new RuntimeException("Chưa hoàn tất giao dịch với mã order thanh toán: " + paymentTransaction.getOrderCode());
         }
 
-        User user = paymentTransaction.getUser();
+        User loginUser = paymentTransaction.getUser();
         SubscriptionPlan subscriptionPlan = paymentTransaction.getSubscriptionPlan();
 
         LocalDateTime startDate = paymentTransaction.getPaidAt() != null ? paymentTransaction.getPaidAt() : LocalDateTime.now();
         LocalDateTime endDate = startDate.plusDays(subscriptionPlan.getDurationDays());
 
         UserSubscription userSubscription = UserSubscription.builder()
-                .user(user)
+                .user(loginUser)
                 .subscriptionPlan(subscriptionPlan)
                 .paymentTransaction(paymentTransaction)
                 .startDate(startDate)
@@ -204,12 +208,15 @@ public class PaymentTransactionServiceImpl implements PaymentTransactionService 
                 .state(Constant.ACTIVE)
                 .build();
 
+        userSubscription.setCreatedBy(loginUser.getUsername());
+        userSubscription.setUpdatedBy(loginUser.getUsername());
+
         userSubscriptionRepository.save(userSubscription);
 
-        user.setPremiumStatus(Constant.PREMIUM);
-        user.setPremiumExpiredAt(endDate);
+        loginUser.setPremiumStatus(Constant.PREMIUM);
+        loginUser.setPremiumExpiredAt(endDate);
 
-        userRepository.save(user);
+        userRepository.save(loginUser);
     }
 
     private boolean isSuccessResponse(Map<String, String> params) {

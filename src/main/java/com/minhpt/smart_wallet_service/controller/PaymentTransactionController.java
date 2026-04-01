@@ -53,4 +53,15 @@ public class PaymentTransactionController {
         log.info("IPN call from VNPAY");
         return ResponseEntity.ok(paymentTransactionService.handleVnpayIpn(request));
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<PaymentTransactionResponse>> getDetails(@PathVariable Long id){
+        return ResponseEntity.ok(
+                ApiResponse.<PaymentTransactionResponse>builder()
+                        .status(200)
+                        .message(Constant.SUCCESS)
+                        .data(paymentTransactionService.getDetails(id))
+                        .build()
+        );
+    }
 }

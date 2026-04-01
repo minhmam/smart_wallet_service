@@ -9,6 +9,5 @@ import org.mapstruct.Mapping;
 @Mapper(config = MapStructConfig.class)
 public interface AccountBalanceMapper {
 
-    @Mapping(source = "user.id", target = "userId")
     AccountBalanceDTO toDTO(AccountBalance entity);
 }

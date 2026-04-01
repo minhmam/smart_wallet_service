@@ -2,6 +2,7 @@ package com.minhpt.smart_wallet_service.service.impl;
 
 import com.minhpt.smart_wallet_service.dto.AccountBalanceDTO;
 import com.minhpt.smart_wallet_service.mapper.AccountBalanceMapper;
+import com.minhpt.smart_wallet_service.model.AccountBalance;
 import com.minhpt.smart_wallet_service.model.User;
 import com.minhpt.smart_wallet_service.repository.AccountBalanceRepository;
 import com.minhpt.smart_wallet_service.service.AccountBalanceService;
@@ -20,12 +21,22 @@ public class AccountBalanceServiceImpl implements AccountBalanceService {
     @Override
     public AccountBalanceDTO saveOrUpdate(AccountBalanceDTO accountBalanceDTO) {
 
-        User user = authenticationUtil.getCurrentUser();
+        User loginUser = authenticationUtil.getCurrentUser();
 
-        if(user == null){
+        if(loginUser == null){
             throw new RuntimeException("Lỗi user chưa login");
         }
 
-        return null;
+        AccountBalance accountBalance = accountBalanceRepository.findByUserId(loginUser.getId())
+                .orElse(new AccountBalance());
+
+        accountBalance.setUser(loginUser);
+        accountBalance.setBalance(accountBalanceDTO.getBalance());
+        accountBalance.setCreatedBy(loginUser.getUsername());
+        accountBalance.setUpdatedBy(loginUser.getUsername());
+
+        AccountBalance saveAccountBalance = accountBalanceRepository.save(accountBalance);
+
+        return accountBalanceMapper.toDTO(saveAccountBalance);
     }
 }

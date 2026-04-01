@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.util.List;
 
@@ -20,6 +21,7 @@ import java.util.List;
 public class TransactionController {
 
     private final TransactionService transactionService;
+    private final JsonMapper.Builder builder;
 
     @PostMapping("/search")
     public ResponseEntity<ApiResponse<List<TransactionResponse>>> search(@RequestBody TransactionSearchRequest req){
@@ -34,7 +36,7 @@ public class TransactionController {
         );
     }
 
-    @PostMapping("/")
+    @PostMapping()
     public ResponseEntity<ApiResponse<TransactionResponse>> create(@Valid @RequestBody TransactionCreateRequest req) {
         return ResponseEntity.ok(
                 ApiResponse.<TransactionResponse>builder()
@@ -91,4 +93,18 @@ public class TransactionController {
                         .build()
         );
     }
+
+    @GetMapping("/type/{type}")
+    public ResponseEntity<ApiResponse<List<TransactionResponse>>> findByType(@PathVariable String type){
+        List<TransactionResponse> transactionResponseList = transactionService.findByType(type);
+        return ResponseEntity.ok(
+                ApiResponse.<List<TransactionResponse>> builder()
+                        .status(200)
+                        .message(Constant.SUCCESS)
+                        .data(transactionResponseList)
+                        .total(transactionResponseList.size())
+                        .build()
+        );
+    }
 }
+

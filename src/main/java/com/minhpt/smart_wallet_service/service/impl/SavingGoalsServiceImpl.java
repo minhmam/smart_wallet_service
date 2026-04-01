@@ -6,6 +6,7 @@ import com.minhpt.smart_wallet_service.dto.request.SavingGoalsSearchRequest;
 import com.minhpt.smart_wallet_service.dto.response.SavingGoalsResponse;
 import com.minhpt.smart_wallet_service.mapper.SavingGoalsMapper;
 import com.minhpt.smart_wallet_service.model.SavingGoal;
+import com.minhpt.smart_wallet_service.model.User;
 import com.minhpt.smart_wallet_service.repository.SavingGoalsRepository;
 import com.minhpt.smart_wallet_service.service.SavingGoalsService;
 import com.minhpt.smart_wallet_service.util.AuthenticationUtil;
@@ -26,8 +27,15 @@ public class SavingGoalsServiceImpl implements SavingGoalsService {
     @Override
     public SavingGoalsResponse create(SavingGoalsCreateRequest req) {
 
-        SavingGoal savingGoal = savingGoalsMapper.toEntity(req);
+        User loginUser = authenticationUtil.getCurrentUser();
 
+        if(loginUser == null){
+            throw new RuntimeException("Chưa có user login vào hệ thống");
+        }
+
+        SavingGoal savingGoal = savingGoalsMapper.toEntity(req);
+        savingGoal.setCreatedBy(loginUser.getUsername());
+        savingGoal.setUpdatedBy(loginUser.getUsername());
         savingGoalsRepository.save(savingGoal);
 
         return savingGoalsMapper.toResponse(savingGoal);

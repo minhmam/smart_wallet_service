@@ -36,7 +36,7 @@ public class SavingGoalsController {
         );
     }
 
-    @PostMapping("/")
+    @PostMapping()
     public ResponseEntity<ApiResponse<SavingGoalsResponse>> create(@Valid @RequestBody SavingGoalsCreateRequest req){
         return ResponseEntity.ok(
                 ApiResponse.<SavingGoalsResponse>builder()
@@ -58,7 +58,7 @@ public class SavingGoalsController {
         );
     }
 
-    @GetMapping("/")
+    @GetMapping()
     public ResponseEntity<ApiResponse<List<SavingGoalsResponse>>> getAll(){
         return ResponseEntity.ok(
                 ApiResponse.<List<SavingGoalsResponse>>builder()

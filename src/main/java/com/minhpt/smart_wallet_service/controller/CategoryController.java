@@ -22,7 +22,7 @@ public class CategoryController {
     private final CategoryService categoryService;
 
     @GetMapping("/top-5/get")
-    public ResponseEntity<ApiResponse<List<CategoryResponse>>> getTop5MostUsedCategories(){
+    public ResponseEntity<ApiResponse<List<CategoryResponse>>> getTop5MostUsedCategories() {
         List<CategoryResponse> categories = categoryService.getTop5MostUsedCategories();
         return ResponseEntity.ok(
                 ApiResponse.<List<CategoryResponse>>builder().
@@ -35,7 +35,7 @@ public class CategoryController {
     }
 
     @PostMapping("/search")
-    public ResponseEntity<ApiResponse<List<CategoryResponse>>> search(@RequestBody CategorySearchRequest req){
+    public ResponseEntity<ApiResponse<List<CategoryResponse>>> search(@RequestBody CategorySearchRequest req) {
         Page<CategoryResponse> page = categoryService.search(req);
         return ResponseEntity.ok(
                 ApiResponse.<List<CategoryResponse>>builder()
@@ -47,8 +47,8 @@ public class CategoryController {
         );
     }
 
-    @PostMapping("")
-    public ResponseEntity<ApiResponse<CategoryResponse>> createCategory(@Valid @RequestBody CategoryCreateRequest req){
+    @PostMapping()
+    public ResponseEntity<ApiResponse<CategoryResponse>> createCategory(@Valid @RequestBody CategoryCreateRequest req) {
         return ResponseEntity.ok(
                 ApiResponse.<CategoryResponse>builder()
                         .status(200)
@@ -59,7 +59,7 @@ public class CategoryController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<CategoryResponse>> updateCategory(@PathVariable Long id, @Valid @RequestBody CategoryCreateRequest req){
+    public ResponseEntity<ApiResponse<CategoryResponse>> updateCategory(@PathVariable Long id, @Valid @RequestBody CategoryCreateRequest req) {
         return ResponseEntity.ok(
                 ApiResponse.<CategoryResponse>builder()
                         .status(200)
@@ -69,8 +69,19 @@ public class CategoryController {
         );
     }
 
+    @GetMapping("/{categoryId}")
+    public ResponseEntity<ApiResponse<CategoryResponse>> getDetails(@PathVariable Long categoryId) {
+        return ResponseEntity.ok(
+                ApiResponse.<CategoryResponse>builder()
+                        .status(200)
+                        .message(Constant.SUCCESS)
+                        .data(categoryService.getDetails(categoryId))
+                        .build()
+        );
+    }
+
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<CategoryResponse>> deleteCategory(@PathVariable Long id){
+    public ResponseEntity<ApiResponse<CategoryResponse>> deleteCategory(@PathVariable Long id) {
         categoryService.delete(id);
         return ResponseEntity.ok(
                 ApiResponse.<CategoryResponse>builder()
@@ -81,7 +92,7 @@ public class CategoryController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<CategoryResponse>>> getAll(){
+    public ResponseEntity<ApiResponse<List<CategoryResponse>>> getAll() {
         return ResponseEntity.ok(
                 ApiResponse.<List<CategoryResponse>>builder()
                         .status(200)

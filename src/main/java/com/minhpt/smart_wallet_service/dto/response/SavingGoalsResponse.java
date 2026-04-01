@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
@@ -14,7 +15,9 @@ import java.time.LocalDateTime;
 public class SavingGoalsResponse {
     private Long id;
     private String name;
-    private Double targetAmount;
-    private Double currentAmount;
+    private BigDecimal targetAmount;
+    private BigDecimal currentAmount;
     private LocalDateTime deadline;
+    private String icon;
+    private String color;
 }

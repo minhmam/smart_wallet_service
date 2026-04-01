@@ -6,6 +6,7 @@ import com.minhpt.smart_wallet_service.dto.request.CategorySearchRequest;
 import com.minhpt.smart_wallet_service.dto.response.CategoryResponse;
 import com.minhpt.smart_wallet_service.mapper.CategoryMapper;
 import com.minhpt.smart_wallet_service.model.Category;
+import com.minhpt.smart_wallet_service.model.User;
 import com.minhpt.smart_wallet_service.repository.CategoryRepository;
 import com.minhpt.smart_wallet_service.service.CategoryService;
 import com.minhpt.smart_wallet_service.util.AuthenticationUtil;
@@ -25,7 +26,15 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public CategoryResponse create(CategoryCreateRequest req) {
+        User loginUser = authenticationUtil.getCurrentUser();
+
+        if(loginUser == null){
+            throw new RuntimeException("Chưa có user login vào hệ thống");
+        }
+
         Category category = categoryMapper.toEntity(req);
+        category.setCreatedBy(loginUser.getUsername());
+        category.setUpdatedBy(loginUser.getUsername());
 
         return categoryMapper.toResponse(categoryRepository.save(category));
     }
@@ -68,6 +77,14 @@ public class CategoryServiceImpl implements CategoryService {
         List<Category> categories = categoryRepository.findAllByCreatedBy(username);
 
         return categoryMapper.toListResponse(categories);
+    }
+
+    @Override
+    public CategoryResponse getDetails(Long categoryId) {
+        Category category = categoryRepository.findByIdAndStatus(categoryId, Constant.NOT_DELETE)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy hạng mục tưng ứng id = " + categoryId));
+
+        return categoryMapper.toResponse(category);
     }
 
 

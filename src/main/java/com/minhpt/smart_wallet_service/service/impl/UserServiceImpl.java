@@ -1,6 +1,8 @@
 package com.minhpt.smart_wallet_service.service.impl;
 
 import com.minhpt.smart_wallet_service.constant.Constant;
+import com.minhpt.smart_wallet_service.dto.AccountBalanceDTO;
+import com.minhpt.smart_wallet_service.service.AccountBalanceService;
 import com.minhpt.smart_wallet_service.service.VerificationTokenService;
 import com.minhpt.smart_wallet_service.util.AuthenticationUtil;
 import com.minhpt.smart_wallet_service.dto.request.UserCreateRequest;
@@ -14,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Service
@@ -25,6 +28,7 @@ public class UserServiceImpl implements UserService {
     private final AuthenticationUtil authenticationUtil;
     private final PasswordEncoder passwordEncoder;
     private final VerificationTokenService verificationTokenService;
+    private final AccountBalanceService accountBalanceService;
 
     @Override
     public UserResponse createUser(UserCreateRequest req) {
@@ -38,6 +42,12 @@ public class UserServiceImpl implements UserService {
 
         User savedUser = userRepository.save(user);
 
+        //Tạo mail
+        AccountBalanceDTO accountBalanceDTO = new AccountBalanceDTO();
+        accountBalanceDTO.setBalance(BigDecimal.valueOf(0));
+        accountBalanceService.saveOrUpdate(accountBalanceDTO);
+
+        //Send mail
         verificationTokenService.sendVerifyEmail(savedUser);
 
         return userMapper.toResponse(savedUser);

@@ -15,5 +15,5 @@ public class CategoryResponse {
     private String name;
     private String type;
     private String icon;
-    private LocalDateTime createdAt;
+    private String color;
 }
