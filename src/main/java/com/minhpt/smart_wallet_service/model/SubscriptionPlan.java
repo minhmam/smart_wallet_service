@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 @Entity
 @Table(name = "subscription_plans")
 @Data
@@ -30,7 +32,7 @@ public class SubscriptionPlan extends BaseEntity{
     private String name;
 
     @Column(name = "price")
-    private Long price;
+    private BigDecimal price;
 
     @Column(name = "duration_days")
     private Long durationDays;

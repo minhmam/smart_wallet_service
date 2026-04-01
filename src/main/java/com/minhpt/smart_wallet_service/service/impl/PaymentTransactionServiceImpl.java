@@ -2,12 +2,10 @@ package com.minhpt.smart_wallet_service.service.impl;
 
 import com.minhpt.smart_wallet_service.constant.Constant;
 import com.minhpt.smart_wallet_service.dto.request.CreatePaymentTransactionRequest;
+import com.minhpt.smart_wallet_service.dto.request.TransactionCreateRequest;
 import com.minhpt.smart_wallet_service.dto.response.PaymentTransactionResponse;
 import com.minhpt.smart_wallet_service.mapper.PaymentTransactionMapper;
-import com.minhpt.smart_wallet_service.model.PaymentTransaction;
-import com.minhpt.smart_wallet_service.model.SubscriptionPlan;
-import com.minhpt.smart_wallet_service.model.User;
-import com.minhpt.smart_wallet_service.model.UserSubscription;
+import com.minhpt.smart_wallet_service.model.*;
 import com.minhpt.smart_wallet_service.payment.vnpay.service.VnpayService;
 import com.minhpt.smart_wallet_service.repository.PaymentTransactionRepository;
 import com.minhpt.smart_wallet_service.repository.SubscriptionPlanRepository;
@@ -23,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -152,15 +151,15 @@ public class PaymentTransactionServiceImpl implements PaymentTransactionService 
             return;
         }
 
-        long returnedAmount;
+        BigDecimal returnedAmount;
         try {
-            returnedAmount = Long.parseLong(amountStr);
+            returnedAmount = new BigDecimal(amountStr);
         } catch (NumberFormatException e) {
             return;
         }
 
-        long expectedAmount = transaction.getAmount() * 100L;
-        if (returnedAmount != expectedAmount) {
+        BigDecimal expectedAmount = transaction.getAmount().multiply(BigDecimal.valueOf(100L));
+        if (returnedAmount.compareTo(expectedAmount) != 0) {
             return;
         }
 
@@ -217,6 +216,18 @@ public class PaymentTransactionServiceImpl implements PaymentTransactionService 
         loginUser.setPremiumExpiredAt(endDate);
 
         userRepository.save(loginUser);
+
+        //Tao transaction
+        TransactionCreateRequest request = new TransactionCreateRequest();
+        request.builder()
+                .amount(subscriptionPlan.getPrice())
+                .type("EXPENSE")
+                .description("Thanh toán prenium")
+                .categoryId(1L)
+                .transactionDate(LocalDateTime.now())
+                .aiPredicted(false)
+                .build();
+
     }
 
     private boolean isSuccessResponse(Map<String, String> params) {

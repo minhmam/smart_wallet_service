@@ -7,6 +7,7 @@ import com.minhpt.smart_wallet_service.payment.vnpay.util.VnpayUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
@@ -33,7 +34,7 @@ public class VnpayServiceImpl implements VnpayService {
         params.put("vnp_Version", vnpayConfig.getVersion());
         params.put("vnp_Command", vnpayConfig.getCommand());
         params.put("vnp_TmnCode", vnpayConfig.getTmnCode());
-        params.put("vnp_Amount", String.valueOf(tx.getAmount() * 100L));
+        params.put("vnp_Amount", tx.getAmount().multiply(BigDecimal.valueOf(100)).toBigIntegerExact().toString());
         params.put("vnp_CurrCode", vnpayConfig.getCurrCode());
         params.put("vnp_TxnRef", tx.getOrderCode());
         params.put("vnp_OrderInfo", vnpayConfig.getOrderInfo());

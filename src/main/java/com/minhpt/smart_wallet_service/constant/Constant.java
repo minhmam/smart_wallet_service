@@ -16,7 +16,5 @@ public class Constant {
     public static final String STATE_PENDING = "PENDING";
     public static final String STATE_SUCCESS = "SUCCESS";
     public static final String STATE_FAILED = "FAILED";
-
-    public static final int NOT_PREMIUM = 0;
     public static final int PREMIUM = 1;
 }
