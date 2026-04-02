@@ -35,7 +35,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         RefreshToken rt = refreshTokenRepository.findByToken(token)
                 .orElseThrow(() -> new RuntimeException("Invalid refresh token"));
 
-        if(rt.getExpireDate().isBefore(LocalDateTime.now())){
+        if (rt.getExpireDate().isBefore(LocalDateTime.now())) {
             refreshTokenRepository.delete(rt);
             throw new RuntimeException("Expired refresh token");
         }

@@ -12,7 +12,6 @@ import lombok.NoArgsConstructor;
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SubscriptionPlanResponse {
-
     private Long id;
     private String code;
     private String name;

@@ -21,19 +21,6 @@ public class CategoryController {
 
     private final CategoryService categoryService;
 
-    @GetMapping("/top-5/get")
-    public ResponseEntity<ApiResponse<List<CategoryResponse>>> getTop5MostUsedCategories() {
-        List<CategoryResponse> categories = categoryService.getTop5MostUsedCategories();
-        return ResponseEntity.ok(
-                ApiResponse.<List<CategoryResponse>>builder().
-                        status(200)
-                        .message(Constant.SUCCESS)
-                        .data(categories)
-                        .total(categories.size())
-                        .build()
-        );
-    }
-
     @PostMapping("/search")
     public ResponseEntity<ApiResponse<List<CategoryResponse>>> search(@RequestBody CategorySearchRequest req) {
         Page<CategoryResponse> page = categoryService.search(req);
@@ -59,7 +46,8 @@ public class CategoryController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<CategoryResponse>> updateCategory(@PathVariable Long id, @Valid @RequestBody CategoryCreateRequest req) {
+    public ResponseEntity<ApiResponse<CategoryResponse>> updateCategory(@PathVariable Long id,
+                                                                        @Valid @RequestBody CategoryCreateRequest req) {
         return ResponseEntity.ok(
                 ApiResponse.<CategoryResponse>builder()
                         .status(200)
@@ -70,12 +58,12 @@ public class CategoryController {
     }
 
     @GetMapping("/{categoryId}")
-    public ResponseEntity<ApiResponse<CategoryResponse>> getDetails(@PathVariable Long categoryId) {
+    public ResponseEntity<ApiResponse<CategoryResponse>> getDetail(@PathVariable Long categoryId) {
         return ResponseEntity.ok(
                 ApiResponse.<CategoryResponse>builder()
                         .status(200)
                         .message(Constant.SUCCESS)
-                        .data(categoryService.getDetails(categoryId))
+                        .data(categoryService.getDetail(categoryId))
                         .build()
         );
     }
@@ -87,17 +75,6 @@ public class CategoryController {
                 ApiResponse.<CategoryResponse>builder()
                         .status(200)
                         .message(Constant.SUCCESS)
-                        .build()
-        );
-    }
-
-    @GetMapping
-    public ResponseEntity<ApiResponse<List<CategoryResponse>>> getAll() {
-        return ResponseEntity.ok(
-                ApiResponse.<List<CategoryResponse>>builder()
-                        .status(200)
-                        .message(Constant.SUCCESS)
-                        .data(categoryService.getAll())
                         .build()
         );
     }

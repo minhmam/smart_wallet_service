@@ -13,6 +13,4 @@ public interface UserSubscriptionRepository extends JpaRepository<UserSubscripti
     Optional<UserSubscription> findByIdAndState(Long id, String state);
 
     List<UserSubscription> findAllByUserIdAndStatus(Long userId, Integer status);
-//
-//    boolean exitsByPaymentTransactionId(Long paymentTransasctionId);
 }

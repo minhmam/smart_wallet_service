@@ -20,12 +20,7 @@ public class AccountBalanceServiceImpl implements AccountBalanceService {
 
     @Override
     public AccountBalanceDTO saveOrUpdate(AccountBalanceDTO accountBalanceDTO) {
-
         User loginUser = authenticationUtil.getCurrentUser();
-
-        if(loginUser == null){
-            throw new RuntimeException("Lỗi user chưa login");
-        }
 
         AccountBalance accountBalance = accountBalanceRepository.findByUserId(loginUser.getId())
                 .orElse(new AccountBalance());

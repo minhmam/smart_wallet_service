@@ -33,7 +33,6 @@ public abstract class BaseEntity {
 
     @PrePersist
     public void prePersist() {
-
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
         this.status = Constant.NOT_DELETE;
@@ -41,17 +40,6 @@ public abstract class BaseEntity {
 
     @PreUpdate
     public void preUpdate() {
-
         this.updatedAt = LocalDateTime.now();
-
-//        AuthenticationUtil authUtil = SpringContextHolder.getBean(AuthenticationUtil.class);
-//
-//        String username = Constant.USER_DEFAULT;
-//
-//        if (authUtil != null && authUtil.getCurrentUser() != null) {
-//            username = authUtil.getCurrentUser().getUsername();
-//        }
-//
-//        this.setUpdatedBy(username);
     }
 }

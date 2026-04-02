@@ -14,7 +14,6 @@ import java.time.LocalDateTime;
 @Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PaymentTransactionResponse {
-
     private Long id;
     private Long userId;
     private Long subscriptionPlanId;

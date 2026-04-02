@@ -24,7 +24,7 @@ public class SavingGoalsController {
     private final SavingGoalsService savingGoalsService;
 
     @PostMapping("/search")
-    public ResponseEntity<ApiResponse<List<SavingGoalsResponse>>> search(@RequestBody SavingGoalsSearchRequest req){
+    public ResponseEntity<ApiResponse<List<SavingGoalsResponse>>> search(@RequestBody SavingGoalsSearchRequest req) {
         Page<SavingGoalsResponse> page = savingGoalsService.search(req);
         return ResponseEntity.ok(
                 ApiResponse.<List<SavingGoalsResponse>>builder()
@@ -37,7 +37,7 @@ public class SavingGoalsController {
     }
 
     @PostMapping()
-    public ResponseEntity<ApiResponse<SavingGoalsResponse>> create(@Valid @RequestBody SavingGoalsCreateRequest req){
+    public ResponseEntity<ApiResponse<SavingGoalsResponse>> create(@Valid @RequestBody SavingGoalsCreateRequest req) {
         return ResponseEntity.ok(
                 ApiResponse.<SavingGoalsResponse>builder()
                         .status(200)
@@ -48,7 +48,7 @@ public class SavingGoalsController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<SavingGoalsResponse>> update(@PathVariable Long id, @RequestBody SavingGoalsCreateRequest req){
+    public ResponseEntity<ApiResponse<SavingGoalsResponse>> update(@PathVariable Long id, @RequestBody SavingGoalsCreateRequest req) {
         return ResponseEntity.ok(
                 ApiResponse.<SavingGoalsResponse>builder()
                         .status(200)
@@ -58,20 +58,8 @@ public class SavingGoalsController {
         );
     }
 
-    @GetMapping()
-    public ResponseEntity<ApiResponse<List<SavingGoalsResponse>>> getAll(){
-        return ResponseEntity.ok(
-                ApiResponse.<List<SavingGoalsResponse>>builder()
-                        .status(200)
-                        .message(Constant.SUCCESS)
-                        .data(savingGoalsService.getAll())
-                        .total(savingGoalsService.getAll().size())
-                        .build()
-        );
-    }
-
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<SavingGoalsResponse>> getDetails(@PathVariable Long id){
+    public ResponseEntity<ApiResponse<SavingGoalsResponse>> getDetails(@PathVariable Long id) {
         return ResponseEntity.ok(
                 ApiResponse.<SavingGoalsResponse>builder()
                         .status(200)
@@ -82,7 +70,7 @@ public class SavingGoalsController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<SavingGoalsResponse>> delete(@PathVariable Long id){
+    public ResponseEntity<ApiResponse<SavingGoalsResponse>> delete(@PathVariable Long id) {
         savingGoalsService.delete(id);
         return ResponseEntity.ok(
                 ApiResponse.<SavingGoalsResponse>builder()
@@ -91,6 +79,4 @@ public class SavingGoalsController {
                         .build()
         );
     }
-
-
 }

@@ -19,7 +19,7 @@ public class AccountBalanceController {
     private final AccountBalanceService accountBalanceService;
 
     @PostMapping
-    public ResponseEntity<ApiResponse<AccountBalanceDTO>> create(@RequestBody AccountBalanceDTO dto){
+    public ResponseEntity<ApiResponse<AccountBalanceDTO>> create(@RequestBody AccountBalanceDTO dto) {
 
         return ResponseEntity.ok(
                 ApiResponse.<AccountBalanceDTO>builder()

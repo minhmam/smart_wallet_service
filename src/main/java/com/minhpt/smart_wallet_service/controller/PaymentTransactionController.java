@@ -23,7 +23,7 @@ public class PaymentTransactionController {
     private final PaymentTransactionService paymentTransactionService;
 
     @PostMapping
-    public ResponseEntity<ApiResponse<PaymentTransactionResponse>> create(@Valid @RequestBody CreatePaymentTransactionRequest req, HttpServletRequest request){
+    public ResponseEntity<ApiResponse<PaymentTransactionResponse>> create(@Valid @RequestBody CreatePaymentTransactionRequest req, HttpServletRequest request) {
 
         return ResponseEntity.ok(
                 ApiResponse.<PaymentTransactionResponse>builder()
@@ -55,7 +55,7 @@ public class PaymentTransactionController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<PaymentTransactionResponse>> getDetails(@PathVariable Long id){
+    public ResponseEntity<ApiResponse<PaymentTransactionResponse>> getDetails(@PathVariable Long id) {
         return ResponseEntity.ok(
                 ApiResponse.<PaymentTransactionResponse>builder()
                         .status(200)

@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class SavingGoal extends BaseEntity{
+public class SavingGoal extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "saving_goals_id_seq")
     @SequenceGenerator(

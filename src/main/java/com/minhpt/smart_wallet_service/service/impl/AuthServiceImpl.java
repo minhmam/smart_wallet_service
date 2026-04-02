@@ -25,9 +25,7 @@ public class AuthServiceImpl implements AuthService {
         User user = userRepository.findByUsername(req.getUsername())
                 .orElse(null);
 
-        if (user == null ||
-                !passwordEncoder.matches(req.getPassword(), user.getPassword())) {
-
+        if (user == null || !passwordEncoder.matches(req.getPassword(), user.getPassword())) {
             throw new AuthException("Invalid credentials");
         }
 

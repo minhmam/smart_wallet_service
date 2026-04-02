@@ -30,28 +30,27 @@ public class SavingGoalsRepositoryCustomImpl implements SavingGoalsRepositoryCus
 
     @Override
     public Page<SavingGoalsResponse> search(SavingGoalsSearchRequest req) {
-
         List<SavingGoalsResponse> savingGoalsResponseList = new ArrayList<>();
         int page = req.getPage();
         int size = req.getSize();
 
         StringBuilder sql = new StringBuilder("select " +
-                "sg.id , " +
-                "sg.name , " +
-                "sg.target_amount , " +
-                "sg.current_amount , " +
-                "sg.deadline, " +
-                "sg.icon, " +
-                "sg.color " +
-                "from " +
-                "saving_goals sg " +
-                "where " +
-                "sg.status = 1 " +
-                "and (UPPER(sg.created_by)) like UPPER(:name)");
+                " sg.id , " +
+                " sg.name , " +
+                " sg.target_amount , " +
+                " sg.current_amount , " +
+                " sg.deadline, " +
+                " sg.icon, " +
+                " sg.color " +
+                " from saving_goals sg " +
+                " where sg.status = 1 " +
+                " and (UPPER(sg.created_by)) = UPPER(:username)");
 
-        if(!ObjectUtils.isEmpty(req.getKeySearch())){
-            sql.append("and ((upper(sg.created_by) like upper(:keySearch)) " +
-                    "or (upper(sg.name) like upper(:keySearch)))");
+        if (!ObjectUtils.isEmpty(req.getKeySearch())) {
+            sql.append(" and (" +
+                    "   upper(sg.created_by) like upper(:keySearch) " +
+                    "   or upper(sg.name) like upper(:keySearch) " +
+                    " )");
         }
 
         String sqlCount = "SELECT COUNT(*) FROM (" + sql.toString() + ") as Total";
@@ -61,16 +60,12 @@ public class SavingGoalsRepositoryCustomImpl implements SavingGoalsRepositoryCus
 
         String username = authenticationUtil.getCurrentUser().getUsername();
 
-        if(!ObjectUtils.isEmpty(username))
-        {
-            query.setParameter("name", "%"+ username + "%");
-            queryCount.setParameter("name", "%"+ username + "%");
-        }
+        query.setParameter("username", username);
+        queryCount.setParameter("username", username);
 
-        if(!ObjectUtils.isEmpty(req.getKeySearch()))
-        {
-            query.setParameter("keySearch", "%"+ req.getKeySearch() + "%");
-            queryCount.setParameter("keySearch", "%"+ req.getKeySearch() + "%");
+        if (!ObjectUtils.isEmpty(req.getKeySearch())) {
+            query.setParameter("keySearch", "%" + req.getKeySearch() + "%");
+            queryCount.setParameter("keySearch", "%" + req.getKeySearch() + "%");
         }
 
         query.setFirstResult(page * size);
@@ -78,20 +73,19 @@ public class SavingGoalsRepositoryCustomImpl implements SavingGoalsRepositoryCus
 
         List<Object[]> result = query.getResultList();
 
-        for(Object[] item : result){
-
+        for (Object[] item : result) {
             SavingGoalsResponse response = SavingGoalsResponse.builder()
                     .id(item[0] != null ? (Long) item[0] : null)
                     .name(item[1] != null ? item[1].toString() : null)
                     .targetAmount(item[2] != null ? new BigDecimal(item[2].toString()) : null)
                     .currentAmount(item[3] != null ? new BigDecimal(item[3].toString()) : null)
-                    .deadline(item[4] != null? DataUtil.parseToLocalDateTime(item[3]) : null)
+                    .deadline(item[4] != null ? DataUtil.parseToLocalDateTime(item[3]) : null)
                     .icon(item[5] != null ? item[5].toString() : null)
                     .color(item[6] != null ? item[6].toString() : null)
                     .build();
 
             savingGoalsResponseList.add(response);
-        };
+        }
 
         return new PageImpl<>(
                 savingGoalsResponseList,

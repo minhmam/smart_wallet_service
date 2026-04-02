@@ -28,10 +28,6 @@ public class CategoryServiceImpl implements CategoryService {
     public CategoryResponse create(CategoryCreateRequest req) {
         User loginUser = authenticationUtil.getCurrentUser();
 
-        if(loginUser == null){
-            throw new RuntimeException("Chưa có user login vào hệ thống");
-        }
-
         Category category = categoryMapper.toEntity(req);
         category.setCreatedBy(loginUser.getUsername());
         category.setUpdatedBy(loginUser.getUsername());
@@ -41,21 +37,13 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public CategoryResponse update(CategoryCreateRequest req, long id) {
-
         Category updateCategory = categoryRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Category not found by ID = " + id));
 
-        if (req.getName() != null) {
-            updateCategory.setName(req.getName());
-        }
-
-        if (req.getType() != null) {
-            updateCategory.setType(req.getType());
-        }
-
-        if (req.getIcon() != null) {
-            updateCategory.setIcon(req.getIcon());
-        }
+        updateCategory.setName(req.getName());
+        updateCategory.setType(req.getType());
+        updateCategory.setIcon(req.getIcon());
+        updateCategory.setColor(req.getColor());
 
         categoryRepository.save(updateCategory);
 
@@ -80,7 +68,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public CategoryResponse getDetails(Long categoryId) {
+    public CategoryResponse getDetail(Long categoryId) {
         Category category = categoryRepository.findByIdAndStatus(categoryId, Constant.NOT_DELETE)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy hạng mục tưng ứng id = " + categoryId));
 

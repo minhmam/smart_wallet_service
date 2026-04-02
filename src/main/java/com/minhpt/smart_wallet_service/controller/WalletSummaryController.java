@@ -18,7 +18,7 @@ public class WalletSummaryController {
     private final WalletSumaryService service;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<WalletSumaryResponse>> getWalletSummary(){
+    public ResponseEntity<ApiResponse<WalletSumaryResponse>> getWalletSummary() {
         return ResponseEntity.ok(
                 ApiResponse.<WalletSumaryResponse>builder()
                         .status(200)

@@ -8,8 +8,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 @EnableJpaAuditing
 public class SmartWalletServiceApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(SmartWalletServiceApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(SmartWalletServiceApplication.class, args);
+    }
 
 }

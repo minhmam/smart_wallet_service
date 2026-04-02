@@ -20,7 +20,7 @@ public class OcrController {
     private final OcrService ocrService;
 
     @PostMapping("/extract")
-    public ResponseEntity<?> extract(@RequestParam("file")MultipartFile file){
+    public ResponseEntity<?> extract(@RequestParam("file") MultipartFile file) {
 
         OcrExtractResponse response = ocrService.extractTransactions(file);
         return ResponseEntity.ok(

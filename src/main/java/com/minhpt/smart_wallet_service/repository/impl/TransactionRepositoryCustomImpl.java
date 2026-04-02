@@ -43,14 +43,24 @@ public class TransactionRepositoryCustomImpl implements TransactionRepositoryCus
         if (!ObjectUtils.isEmpty(req.getKeySearch())) {
             sql.append(" and (upper(t.description) like upper(:keySearch)) ");
         }
+
+        if (!ObjectUtils.isEmpty(req.getType())) {
+            sql.append(" and t.TYPE = :type ");
+        }
+
         sql.append(" ORDER BY t.updated_at DESC ");
 
         Query query = em.createNativeQuery(sql.toString());
-        Query queryCount = em.createNativeQuery("SELECT COUNT(*) FROM (" + sql.toString()+ ") as total");
+        Query queryCount = em.createNativeQuery("SELECT COUNT(*) FROM (" + sql + ") as total");
 
         if (!ObjectUtils.isEmpty(req.getKeySearch())) {
             query.setParameter("keySearch", "%" + req.getKeySearch() + "%");
             queryCount.setParameter("keySearch", "%" + req.getKeySearch() + "%");
+        }
+
+        if (!ObjectUtils.isEmpty(req.getType())) {
+            query.setParameter("type", req.getType());
+            queryCount.setParameter("type", req.getType());
         }
 
         query.setFirstResult(page * size);
@@ -59,7 +69,6 @@ public class TransactionRepositoryCustomImpl implements TransactionRepositoryCus
         List<Object[]> result = query.getResultList();
 
         for (Object[] item : result) {
-
             TransactionResponse response = TransactionResponse.builder()
                     .id(item[0] != null ? ((Number) item[0]).longValue() : null)
                     .amount(item[1] != null ? new BigDecimal(item[1].toString()) : null)
