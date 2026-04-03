@@ -17,4 +17,6 @@ public class Constant {
     public static final String STATE_SUCCESS = "SUCCESS";
     public static final String STATE_FAILED = "FAILED";
     public static final int PREMIUM = 1;
+    public static final int NOT_SYSTEM = 0;
+    public static final int SYSTEM = 1;
 }

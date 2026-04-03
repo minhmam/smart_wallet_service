@@ -14,4 +14,5 @@ public interface CategoryRepository extends JpaRepository<Category, Long>, Categ
     Optional<Category> findByIdAndStatus(Long id, int status);
 
     List<Category> findTop10ByStatusOrderByIdAsc(int status);
+
 }

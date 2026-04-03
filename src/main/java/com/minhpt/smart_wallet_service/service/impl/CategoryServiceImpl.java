@@ -26,15 +26,13 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public CategoryResponse create(CategoryCreateRequest req) {
-        User loginUser = authenticationUtil.getCurrentUser();
 
-        if(loginUser == null){
-            throw new RuntimeException("Chưa có user login vào hệ thống");
-        }
+        User loginUser = authenticationUtil.getCurrentUser();
 
         Category category = categoryMapper.toEntity(req);
         category.setCreatedBy(loginUser.getUsername());
         category.setUpdatedBy(loginUser.getUsername());
+        category.setIsSystem(Constant.NOT_SYSTEM);
 
         return categoryMapper.toResponse(categoryRepository.save(category));
     }
@@ -64,10 +62,16 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public void delete(Long id) {
-        Category deteleCategory = categoryRepository.findByIdAndStatus(id, Constant.NOT_DELETE)
+
+        Category deleteCategory = categoryRepository.findByIdAndStatus(id, Constant.NOT_DELETE)
                 .orElseThrow(() -> new RuntimeException("Category not found by ID = " + id));
-        deteleCategory.setStatus(Constant.DELETED);
-        categoryRepository.save(deteleCategory);
+
+        if(deleteCategory.getIsSystem() == Constant.SYSTEM){
+            throw new RuntimeException(("Không thể xóa hạng mục cấu hình mặc định của hệ thống"));
+        }
+
+        deleteCategory.setStatus(Constant.DELETED);
+        categoryRepository.save(deleteCategory);
     }
 
     @Override
