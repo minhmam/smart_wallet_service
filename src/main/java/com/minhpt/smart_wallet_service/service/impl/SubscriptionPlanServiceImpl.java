@@ -20,7 +20,6 @@ public class SubscriptionPlanServiceImpl implements SubscriptionPlanService {
 
     @Override
     public List<SubscriptionPlan> getAll() {
-
         return subscriptionPlanRepository.findAllByStatus(Constant.NOT_DELETE);
     }
 

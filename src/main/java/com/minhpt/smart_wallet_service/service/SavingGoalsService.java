@@ -8,15 +8,13 @@ import org.springframework.data.domain.Page;
 import java.util.List;
 
 public interface SavingGoalsService {
+    Page<SavingGoalsResponse> search(SavingGoalsSearchRequest req);
+
     SavingGoalsResponse create(SavingGoalsCreateRequest req);
 
     SavingGoalsResponse update(SavingGoalsCreateRequest req, Long id);
 
-    List<SavingGoalsResponse> getAll();
-
     SavingGoalsResponse getDetails(Long id);
 
     void delete(Long id);
-
-    Page<SavingGoalsResponse> search(SavingGoalsSearchRequest req);
 }

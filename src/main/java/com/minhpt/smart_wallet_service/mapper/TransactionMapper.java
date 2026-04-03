@@ -11,6 +11,8 @@ import java.util.List;
 @Mapper(config = MapStructConfig.class)
 public interface TransactionMapper {
     Transaction toEntity(TransactionCreateRequest request);
+
     TransactionResponse toResponse(Transaction transaction);
+
     List<TransactionResponse> toListResponse(List<Transaction> transactionList);
 }

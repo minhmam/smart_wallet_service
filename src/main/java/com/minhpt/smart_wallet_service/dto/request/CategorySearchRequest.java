@@ -10,7 +10,7 @@ import lombok.experimental.SuperBuilder;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CategorySearchRequest extends BaseRequest{
+public class CategorySearchRequest extends BaseRequest {
     private String name;
     private String type;
 }

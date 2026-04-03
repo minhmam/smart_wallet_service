@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class SavingGoalsSearchRequest extends BaseRequest{
+public class SavingGoalsSearchRequest extends BaseRequest {
     private String name;
     private Double targetAmount;
     private Double currentAmount;

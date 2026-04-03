@@ -9,5 +9,6 @@ import org.mapstruct.Mapper;
 @Mapper(config = MapStructConfig.class)
 public interface UserMapper {
     User toEntity(UserCreateRequest request);
+
     UserResponse toResponse(User user);
 }

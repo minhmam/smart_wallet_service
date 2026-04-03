@@ -4,7 +4,7 @@ import com.minhpt.smart_wallet_service.model.User;
 
 public interface VerificationTokenService {
 
-     void sendVerifyEmail(User user);
+    void sendVerifyEmail(User user);
 
-     void verifyEmail(String token);
+    void verifyEmail(String token);
 }

@@ -17,16 +17,16 @@ public class GlobalExceptionHandler {
 
     //VALIDATION ERROR
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiResponse<Map<String, String>>> exceptionHandler(MethodArgumentNotValidException ex){
+    public ResponseEntity<ApiResponse<Map<String, String>>> exceptionHandler(MethodArgumentNotValidException ex) {
 
         Map<String, String> errors = new HashMap<>();
 
-        ex.getBindingResult().getFieldErrors().forEach(error ->{
+        ex.getBindingResult().getFieldErrors().forEach(error -> {
             errors.put(error.getField(), error.getDefaultMessage());
         });
 
         return ResponseEntity.badRequest().body(
-                ApiResponse.<Map<String, String>> builder()
+                ApiResponse.<Map<String, String>>builder()
                         .status(HttpStatus.BAD_REQUEST.value())
                         .message("Validation falied")
                         .data(errors)

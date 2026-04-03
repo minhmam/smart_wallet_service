@@ -17,7 +17,7 @@ public interface CategoryService {
 
     List<CategoryResponse> getAll();
 
-    CategoryResponse getDetails(Long categoryId);
+    CategoryResponse getDetail(Long categoryId);
 
     CategoryResponse getById();
 

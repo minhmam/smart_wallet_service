@@ -20,7 +20,6 @@ public class VerificationTokenController {
 
     @GetMapping("/verify")
     public ResponseEntity<ApiResponse<VerificationTokenResponse>> verify(@RequestParam String token) {
-
         verificationTokenService.verifyEmail(token);
 
         return ResponseEntity.ok(

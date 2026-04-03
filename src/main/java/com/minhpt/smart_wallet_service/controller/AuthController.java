@@ -30,10 +30,10 @@ public class AuthController {
     public ResponseEntity<ApiResponse<UserResponse>> createUser(@Valid @RequestBody UserCreateRequest req) {
         return ResponseEntity.ok(
                 ApiResponse.<UserResponse>builder()
-                .status(200)
-                .message("User created successfully")
-                .data(userService.createUser(req))
-                .build()
+                        .status(200)
+                        .message("User created successfully")
+                        .data(userService.createUser(req))
+                        .build()
         );
     }
 

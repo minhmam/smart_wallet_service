@@ -20,22 +20,22 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
     Optional<Transaction> findByIdAndStatus(Long id, int status);
 
     @Query(value = """
-        select coalesce(sum(t.amount), 0)
-        from transactions t
-        where t.status = 1
-          and t.user_id = :userId
-          and t.type = 'INCOME'
-        """, nativeQuery = true)
+            select coalesce(sum(t.amount), 0)
+            from transactions t
+            where t.status = 1
+              and t.user_id = :userId
+              and t.type = 'INCOME'
+            """, nativeQuery = true)
     BigDecimal getTotalIncomeByUserId(Long userId);
 
     @Query(value = """
-        select coalesce(sum(t.amount), 0)
-        from transactions t
-        where t.status = 1
-          and t.user_id = :userId
-          and t.type = 'EXPENSE'
-        """, nativeQuery = true)
+            select coalesce(sum(t.amount), 0)
+            from transactions t
+            where t.status = 1
+              and t.user_id = :userId
+              and t.type = 'EXPENSE'
+            """, nativeQuery = true)
     BigDecimal getTotalExpenseByUserId(Long userId);
 
-    List<Transaction> findByTypeAndUserIdAndStatus(String type, Long userId, Integer status );
+    List<Transaction> findByTypeAndUserIdAndStatus(String type, Long userId, Integer status);
 }

@@ -11,6 +11,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +28,6 @@ public class CategoryRepositoryCustomImpl implements CategoryRepositoryCustom {
         this.authenticationUtil = authenticationUtil;
     }
 
-
     @Override
     public Page<CategoryResponse> search(CategorySearchRequest request) {
         List<CategoryResponse> categories = new ArrayList<>();
@@ -34,15 +35,20 @@ public class CategoryRepositoryCustomImpl implements CategoryRepositoryCustom {
         int size = request.getSize();
 
         StringBuilder sql = new StringBuilder("""
-                SELECT id, name, type, icon, color
+                SELECT 
+                    id, 
+                    name, 
+                    type, 
+                    icon, 
+                    color
                 FROM categories
                 WHERE status = 1
                 """);
-        if (request.getName() != null) {
+        if (!ObjectUtils.isEmpty(request.getName())) {
             sql.append(" AND name LIKE :name ");
         }
 
-        if (request.getType() != null) {
+        if (!ObjectUtils.isEmpty(request.getType())) {
             sql.append(" AND type LIKE :type");
         }
 
@@ -53,12 +59,12 @@ public class CategoryRepositoryCustomImpl implements CategoryRepositoryCustom {
         Query query = em.createNativeQuery(sql.toString());
         Query queryCount = em.createNativeQuery(countSQL);
 
-        if (request.getName() != null && !request.getName().isBlank()) {
+        if (!ObjectUtils.isEmpty(request.getName())) {
             query.setParameter("name", "%" + request.getName() + "%");
             queryCount.setParameter("name", "%" + request.getName() + "%");
         }
 
-        if (request.getType() != null && !request.getType().isBlank()) {
+        if (!ObjectUtils.isEmpty(request.getType())) {
             query.setParameter("type", request.getType());
             queryCount.setParameter("type", request.getType());
         }
@@ -75,7 +81,7 @@ public class CategoryRepositoryCustomImpl implements CategoryRepositoryCustom {
                 response.setName(item[1] != null ? item[1].toString() : null);
                 response.setType(item[2] != null ? item[2].toString() : null);
                 response.setIcon(item[3] != null ? item[3].toString() : null);
-                response.setIcon(item[4] != null ? item[4].toString() : null);
+                response.setColor(item[4] != null ? item[4].toString() : null);
                 categories.add(response);
             }
         }

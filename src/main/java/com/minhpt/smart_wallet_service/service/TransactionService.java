@@ -18,14 +18,9 @@ public interface TransactionService {
 
     TransactionResponse update(TransactionCreateRequest req, Long id);
 
-    List<TransactionResponse> getAll();
-
-    TransactionResponse getDetailsTransaction(Long id);
+    TransactionResponse getDetail(Long id);
 
     Page<TransactionResponse> search(TransactionSearchRequest req);
 
     void delete(Long id);
-
-    List<TransactionResponse> findByType(String type);
-
 }

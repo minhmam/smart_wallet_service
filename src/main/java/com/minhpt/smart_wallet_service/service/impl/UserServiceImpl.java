@@ -60,15 +60,15 @@ public class UserServiceImpl implements UserService {
         User updateUser = userRepository.findById(userLogin.getId())
                 .orElseThrow(() -> new RuntimeException("User not found by ID = " + userLogin.getId()));
 
-        if(req.getFullName() != null){
+        if (req.getFullName() != null) {
             updateUser.setFullName(req.getFullName());
         }
 
-        if(req.getPhoneNumber() != null){
+        if (req.getPhoneNumber() != null) {
             updateUser.setPhoneNumber(req.getPhoneNumber());
         }
 
-        if(req.getEmail() != null){
+        if (req.getEmail() != null) {
             updateUser.setEmail(req.getEmail());
         }
 

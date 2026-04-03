@@ -8,6 +8,7 @@ import com.minhpt.smart_wallet_service.repository.UserRepository;
 import com.minhpt.smart_wallet_service.repository.VerificationTokenRepository;
 import com.minhpt.smart_wallet_service.service.VerificationTokenService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -20,6 +21,9 @@ public class VerificationTokenServiceImpl implements VerificationTokenService {
     private final VerificationTokenRepository verificationTokenRepository;
     private final UserRepository userRepository;
     private final EmailService emailService;
+
+    @Value("${link.baseUrl}")
+    private String baseUrl;
 
     @Override
     public void sendVerifyEmail(User user) {
@@ -35,8 +39,7 @@ public class VerificationTokenServiceImpl implements VerificationTokenService {
 
         verificationTokenRepository.save(vt);
 
-        String link =
-                "http://localhost:8080/auth/verify?token=" + token;
+        String link = baseUrl + "/auth/verify?token=" + token;
 
         emailService.sendVerifyEmail(user.getEmail(), link);
     }

@@ -19,11 +19,9 @@ public class UserController {
 
     private final UserService userService;
 
-
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<UserResponse>> updateUser(@PathVariable Long id, @Valid @RequestBody UserUpdateRequest req){
-        UserResponse updateUser = userService.updateUser(req);
-
+    public ResponseEntity<ApiResponse<UserResponse>> updateUser(@PathVariable Long id,
+                                                                @Valid @RequestBody UserUpdateRequest req) {
         return ResponseEntity.ok(
                 ApiResponse.<UserResponse>builder()
                         .status(200)
@@ -31,7 +29,4 @@ public class UserController {
                         .build()
         );
     }
-
-
-
 }

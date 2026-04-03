@@ -178,9 +178,9 @@ public class OcrTransactionAiExtractor {
 
         return """
                 Bạn là AI chuyên trích xuất dữ liệu tài chính từ văn bản.
-
+                
                 Hãy chuyển đoạn text dưới đây thành JSON theo đúng format:
-
+                
                 [
                   {
                     "categoryId": number,
@@ -190,33 +190,33 @@ public class OcrTransactionAiExtractor {
                     "type": "INCOME" | "EXPENSE"
                   }
                 ]
-
+                
                 Yêu cầu:
                 - CHỈ trả về JSON, không giải thích, không thêm text khác
                 - amount là số nguyên (loại bỏ dấu phẩy, dấu chấm phân cách)
                 - transactionDate phải đúng định dạng dd/MM/yyyy (nếu không có thì để null)
                 - description là mô tả ngắn gọn nội dung giao dịch
                 - categoryId phải chọn từ danh sách category bên dưới bằng ID thật, không tự tạo ID mới
-
+                
                 categoryId map:
                 %s
                 type:
                 - INCOME nếu là thu nhập
                 - EXPENSE nếu là chi tiêu
-
+                
                 Quy tắc suy luận:
-
+                
                 1. Hóa đơn mua hàng → EXPENSE
-
+                
                 2. Chuyển khoản ngân hàng:
                 - Nếu có các từ: "nhận", "nhận tiền", "credit", "tiền vào", "received", "nap", "deposit" → INCOME
                 - Nếu có các từ: "chuyển", "chuyển khoản", "debit", "tiền ra", "paid", "transfer", "thanh toán" → EXPENSE
-
+                
                 3. Ưu tiên nhận diện theo ngữ cảnh:
                 - Nếu có tên người gửi đến tôi → INCOME
                 - Nếu có tên người nhận từ tôi → EXPENSE
                 - Tên tôi là: %s
-
+                
                 4. Nếu không xác định rõ → mặc định EXPENSE
                 """.formatted(categoryPrompt.toString().trim(), resolvedAccountName);
     }

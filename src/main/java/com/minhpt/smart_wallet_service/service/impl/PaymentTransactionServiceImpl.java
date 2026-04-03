@@ -182,13 +182,13 @@ public class PaymentTransactionServiceImpl implements PaymentTransactionService 
         createUserSubscriptionAndUpgradeUser(transaction);
     }
 
-    private void createUserSubscriptionAndUpgradeUser(PaymentTransaction paymentTransaction){
+    private void createUserSubscriptionAndUpgradeUser(PaymentTransaction paymentTransaction) {
 
 //        if(userSubscriptionRepository.exitsByPaymentTransactionId(paymentTransaction.getId())){
 //            throw new RuntimeException("Đã tồn tại user subscription này rồi");
 //        }
 
-        if(!Constant.STATE_SUCCESS.equalsIgnoreCase(paymentTransaction.getState())){
+        if (!Constant.STATE_SUCCESS.equalsIgnoreCase(paymentTransaction.getState())) {
             throw new RuntimeException("Chưa hoàn tất giao dịch với mã order thanh toán: " + paymentTransaction.getOrderCode());
         }
 

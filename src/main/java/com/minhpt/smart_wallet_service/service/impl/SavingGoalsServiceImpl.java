@@ -14,6 +14,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -26,16 +28,12 @@ public class SavingGoalsServiceImpl implements SavingGoalsService {
 
     @Override
     public SavingGoalsResponse create(SavingGoalsCreateRequest req) {
-
         User loginUser = authenticationUtil.getCurrentUser();
-
-        if(loginUser == null){
-            throw new RuntimeException("Chưa có user login vào hệ thống");
-        }
 
         SavingGoal savingGoal = savingGoalsMapper.toEntity(req);
         savingGoal.setCreatedBy(loginUser.getUsername());
         savingGoal.setUpdatedBy(loginUser.getUsername());
+
         savingGoalsRepository.save(savingGoal);
 
         return savingGoalsMapper.toResponse(savingGoal);
@@ -43,7 +41,6 @@ public class SavingGoalsServiceImpl implements SavingGoalsService {
 
     @Override
     public SavingGoalsResponse update(SavingGoalsCreateRequest req, Long id) {
-
         SavingGoal updateSavingGoal = savingGoalsRepository.findByIdAndStatus(id, Constant.NOT_DELETE)
                 .orElseThrow(() -> new RuntimeException("Saving Goals not found by ID = " + id));
 
@@ -55,18 +52,7 @@ public class SavingGoalsServiceImpl implements SavingGoalsService {
     }
 
     @Override
-    public List<SavingGoalsResponse> getAll() {
-
-        String username = authenticationUtil.getCurrentUser().getUsername();
-
-        List<SavingGoal> savingGoalList = savingGoalsRepository.findAllByCreatedByAndStatus(username, Constant.NOT_DELETE);
-
-        return  savingGoalsMapper.toListResponse(savingGoalList);
-    }
-
-    @Override
     public SavingGoalsResponse getDetails(Long id) {
-
         SavingGoal savingGoal = savingGoalsRepository.findByIdAndStatus(id, Constant.NOT_DELETE)
                 .orElseThrow(() -> new RuntimeException("Saving Goals not found by ID = " + id));
 
@@ -75,14 +61,19 @@ public class SavingGoalsServiceImpl implements SavingGoalsService {
 
     @Override
     public void delete(Long id) {
+        String username = authenticationUtil.getCurrentUser().getUsername();
+
         SavingGoal deleteSavingGoal = savingGoalsRepository.findByIdAndStatus(id, Constant.NOT_DELETE)
                 .orElseThrow(() -> new RuntimeException("Saving Goals not found by ID = " + id));
+
         deleteSavingGoal.setStatus(Constant.DELETED);
+        deleteSavingGoal.setUpdatedBy(username);
+
         savingGoalsRepository.save(deleteSavingGoal);
     }
 
     @Override
     public Page<SavingGoalsResponse> search(SavingGoalsSearchRequest req) {
-        return  savingGoalsRepository.search(req);
+        return savingGoalsRepository.search(req);
     }
 }

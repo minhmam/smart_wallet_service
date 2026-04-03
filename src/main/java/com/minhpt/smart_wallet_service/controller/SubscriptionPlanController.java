@@ -21,7 +21,7 @@ public class SubscriptionPlanController {
     private final SubscriptionPlanService subscriptionPlanService;
 
     @GetMapping
-    public ResponseEntity<?> getAll(){
+    public ResponseEntity<?> getAll() {
         return ResponseEntity.ok(
                 ApiResponse.builder()
                         .status(200)
@@ -32,7 +32,7 @@ public class SubscriptionPlanController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<SubscriptionPlanResponse>> getDetail(@PathVariable Long id){
+    public ResponseEntity<ApiResponse<SubscriptionPlanResponse>> getDetail(@PathVariable Long id) {
         return ResponseEntity.ok(
                 ApiResponse.<SubscriptionPlanResponse>builder()
                         .status(200)
