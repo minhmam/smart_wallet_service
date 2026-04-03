@@ -17,5 +17,5 @@ public class CategoryResponse {
     private String type;
     private String icon;
     private String color;
-    private int isSystem;
+    private String createdBy;
 }

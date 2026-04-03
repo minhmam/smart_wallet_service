@@ -38,7 +38,4 @@ public class Category extends BaseEntity {
 
     @Column(name = "color")
     private String color;
-
-    @Column(name = "is_system")
-    private int isSystem;
 }

@@ -30,6 +30,8 @@ public class CategoryRepositoryCustomImpl implements CategoryRepositoryCustom {
 
     @Override
     public Page<CategoryResponse> search(CategorySearchRequest request) {
+
+        String username = authenticationUtil.getCurrentUser().getUsername();
         List<CategoryResponse> categories = new ArrayList<>();
         int page = request.getPage();
         int size = request.getSize();
@@ -40,17 +42,20 @@ public class CategoryRepositoryCustomImpl implements CategoryRepositoryCustom {
                     name, 
                     type, 
                     icon, 
-                    color
+                    color,
+                    created_by
                 FROM categories
-                WHERE status = 1
+                WHERE status = 1 
                 """);
         if (!ObjectUtils.isEmpty(request.getName())) {
-            sql.append(" AND name LIKE :name ");
+            sql.append(" AND name = :name ");
         }
 
         if (!ObjectUtils.isEmpty(request.getType())) {
             sql.append(" AND type LIKE :type");
         }
+
+        sql.append(" AND (created_by = :loginName OR created_by = 'system') ");
 
         sql.append(" ORDER BY pin DESC, updated_at DESC");
 
@@ -58,6 +63,9 @@ public class CategoryRepositoryCustomImpl implements CategoryRepositoryCustom {
 
         Query query = em.createNativeQuery(sql.toString());
         Query queryCount = em.createNativeQuery(countSQL);
+
+        query.setParameter("loginName", username);
+        queryCount.setParameter("loginName", username);
 
         if (!ObjectUtils.isEmpty(request.getName())) {
             query.setParameter("name", "%" + request.getName() + "%");
@@ -82,6 +90,7 @@ public class CategoryRepositoryCustomImpl implements CategoryRepositoryCustom {
                 response.setType(item[2] != null ? item[2].toString() : null);
                 response.setIcon(item[3] != null ? item[3].toString() : null);
                 response.setColor(item[4] != null ? item[4].toString() : null);
+                response.setCreatedBy(item[5] != null ? item[5].toString() : null);
                 categories.add(response);
             }
         }
@@ -101,6 +110,8 @@ public class CategoryRepositoryCustomImpl implements CategoryRepositoryCustom {
                 " c.name, " +
                 " c.type, " +
                 " c.icon, " +
+                " c.color, " +
+                " c.created_by, " +
                 " COUNT(t.id) AS used " +
                 " FROM categories c " +
                 " LEFT JOIN transactions t ON c.id = t.category_id " +
@@ -125,7 +136,8 @@ public class CategoryRepositoryCustomImpl implements CategoryRepositoryCustom {
                 category.setName(item[0] != null ? item[0].toString() : null);
                 category.setType(item[1] != null ? item[1].toString() : null);
                 category.setIcon(item[2] != null ? item[2].toString() : null);
-
+                category.setColor(item[3] != null ? item[3].toString() : null);
+                category.setCreatedBy(item[4] != null ? item[4].toString() : null);
                 categories.add(category);
             }
         }

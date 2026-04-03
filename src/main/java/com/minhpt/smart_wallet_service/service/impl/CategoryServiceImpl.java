@@ -36,13 +36,13 @@ public class CategoryServiceImpl implements CategoryService {
         Category category = categoryMapper.toEntity(req);
         category.setCreatedBy(loginUser.getUsername());
         category.setUpdatedBy(loginUser.getUsername());
-        category.setIsSystem(Constant.NOT_SYSTEM);
 
         return categoryMapper.toResponse(categoryRepository.save(category));
     }
 
     @Override
     public CategoryResponse update(CategoryCreateRequest req, long id) {
+        User loginUser = authenticationUtil.getCurrentUser();
         Category updateCategory = categoryRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Category not found by ID = " + id));
 
@@ -50,6 +50,7 @@ public class CategoryServiceImpl implements CategoryService {
         updateCategory.setType(req.getType());
         updateCategory.setIcon(req.getIcon());
         updateCategory.setColor(req.getColor());
+        updateCategory.setUpdatedBy(loginUser.getUsername());
 
         categoryRepository.save(updateCategory);
 
@@ -62,10 +63,6 @@ public class CategoryServiceImpl implements CategoryService {
         Category deleteCategory = categoryRepository.findByIdAndStatus(id, Constant.NOT_DELETE)
                 .orElseThrow(() -> new RuntimeException("Category not found by ID = " + id));
 
-        if(deleteCategory.getIsSystem() == Constant.SYSTEM){
-            throw new RuntimeException(("Không thể xóa hạng mục cấu hình mặc định của hệ thống"));
-        }
-
         deleteCategory.setStatus(Constant.DELETED);
         categoryRepository.save(deleteCategory);
     }
@@ -74,23 +71,18 @@ public class CategoryServiceImpl implements CategoryService {
     public List<CategoryResponse> getAll() {
 
         String username = authenticationUtil.getCurrentUser().getUsername();
-        List<Category> categories = categoryRepository.findAllByCreatedBy(username);
+
+        List<Category> categories = categoryRepository.getAll(username);
 
         return categoryMapper.toListResponse(categories);
     }
 
     @Override
-    public CategoryResponse getDetails(Long categoryId) {
+    public CategoryResponse getDetail(Long categoryId) {
         Category category = categoryRepository.findByIdAndStatus(categoryId, Constant.NOT_DELETE)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy hạng mục tưng ứng id = " + categoryId));
 
         return categoryMapper.toResponse(category);
-    }
-
-
-    @Override
-    public CategoryResponse getById() {
-        return null;
     }
 
     @Override

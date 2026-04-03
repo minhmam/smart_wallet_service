@@ -68,6 +68,17 @@ public class CategoryController {
         );
     }
 
+    @GetMapping
+    public ResponseEntity<ApiResponse<List<CategoryResponse>>> getAll() {
+        return ResponseEntity.ok(
+                ApiResponse.<List<CategoryResponse>>builder()
+                        .status(200)
+                        .message(Constant.SUCCESS)
+                        .data(categoryService.getAll())
+                        .build()
+        );
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<CategoryResponse>> deleteCategory(@PathVariable Long id) {
         categoryService.delete(id);
