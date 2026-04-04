@@ -1,17 +1,21 @@
 package com.minhpt.smart_wallet_service.service.impl;
 
 import com.minhpt.smart_wallet_service.constant.Constant;
-import com.minhpt.smart_wallet_service.dto.AccountBalanceDTO;
-import com.minhpt.smart_wallet_service.service.AccountBalanceService;
+import com.minhpt.smart_wallet_service.exception.ResourceNotFoundException;
 import com.minhpt.smart_wallet_service.service.VerificationTokenService;
 import com.minhpt.smart_wallet_service.util.AuthenticationUtil;
 import com.minhpt.smart_wallet_service.dto.request.UserCreateRequest;
 import com.minhpt.smart_wallet_service.dto.request.UserUpdateRequest;
 import com.minhpt.smart_wallet_service.dto.response.UserResponse;
 import com.minhpt.smart_wallet_service.mapper.UserMapper;
+import com.minhpt.smart_wallet_service.model.AccountBalance;
+import com.minhpt.smart_wallet_service.model.Role;
 import com.minhpt.smart_wallet_service.model.User;
+import com.minhpt.smart_wallet_service.repository.AccountBalanceRepository;
+import com.minhpt.smart_wallet_service.repository.RoleRepository;
 import com.minhpt.smart_wallet_service.repository.UserRepository;
 import com.minhpt.smart_wallet_service.service.UserService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -28,26 +32,31 @@ public class UserServiceImpl implements UserService {
     private final AuthenticationUtil authenticationUtil;
     private final PasswordEncoder passwordEncoder;
     private final VerificationTokenService verificationTokenService;
-    private final AccountBalanceService accountBalanceService;
+    private final AccountBalanceRepository accountBalanceRepository;
+    private final RoleRepository roleRepository;
 
     @Override
+    @Transactional
     public UserResponse createUser(UserCreateRequest req) {
 
         User user = userMapper.toEntity(req);
 
         user.setPassword(passwordEncoder.encode(req.getPassword()));
-        user.setRole("USER");
-        user.setIsEmailVerified(Constant.NOT_VERIFIED);
-        user.setPremiumStatus(Constant.NOT_PREMIUM);
+        user.setVerified(Constant.NOT_VERIFIED);
 
         User savedUser = userRepository.save(user);
+        Role defaultRole = getOrCreateRole(Constant.ROLE_USER);
+        savedUser.addRole(defaultRole);
 
-        //Tạo mail
-        AccountBalanceDTO accountBalanceDTO = new AccountBalanceDTO();
-        accountBalanceDTO.setBalance(BigDecimal.valueOf(0));
-        accountBalanceService.saveOrUpdate(accountBalanceDTO);
+        if (shouldGrantBootstrapAdmin()) {
+            Role adminRole = getOrCreateRole(Constant.ROLE_ADMIN);
+            savedUser.addRole(adminRole);
+        }
 
-        //Send mail
+        savedUser = userRepository.save(savedUser);
+
+        createInitialAccountBalance(savedUser);
+
         verificationTokenService.sendVerifyEmail(savedUser);
 
         return userMapper.toResponse(savedUser);
@@ -58,7 +67,7 @@ public class UserServiceImpl implements UserService {
         User userLogin = authenticationUtil.getCurrentUser();
 
         User updateUser = userRepository.findById(userLogin.getId())
-                .orElseThrow(() -> new RuntimeException("User not found by ID = " + userLogin.getId()));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found by ID = " + userLogin.getId()));
 
         if (req.getFullName() != null) {
             updateUser.setFullName(req.getFullName());
@@ -85,8 +94,33 @@ public class UserServiceImpl implements UserService {
         User userLogin = authenticationUtil.getCurrentUser();
 
         User detailUser = userRepository.findById(userLogin.getId())
-                .orElseThrow(() -> new RuntimeException("User not found by id + " + userLogin.getId()));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found by id = " + userLogin.getId()));
 
         return userMapper.toResponse(detailUser);
+    }
+
+    private Role getOrCreateRole(String roleName) {
+        return roleRepository.findByName(roleName)
+                .orElseGet(() -> roleRepository.save(
+                        Role.builder()
+                                .name(roleName)
+                                .build()
+                ));
+    }
+
+    private void createInitialAccountBalance(User user) {
+        AccountBalance accountBalance = AccountBalance.builder()
+                .user(user)
+                .balance(BigDecimal.ZERO)
+                .build();
+        accountBalance.setCreatedBy(user.getUsername());
+        accountBalance.setUpdatedBy(user.getUsername());
+        accountBalanceRepository.save(accountBalance);
+    }
+
+    private boolean shouldGrantBootstrapAdmin() {
+        return userRepository.findAll()
+                .stream()
+                .noneMatch(existingUser -> existingUser.getRoleNames().contains(Constant.ROLE_ADMIN));
     }
 }

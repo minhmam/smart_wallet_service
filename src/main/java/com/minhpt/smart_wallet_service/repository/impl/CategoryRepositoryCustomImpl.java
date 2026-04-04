@@ -29,8 +29,7 @@ public class CategoryRepositoryCustomImpl implements CategoryRepositoryCustom {
     }
 
     @Override
-    public Page<CategoryResponse> search(CategorySearchRequest request) {
-
+    public Page<CategoryResponse> search(String lang, CategorySearchRequest request) {
         String username = authenticationUtil.getCurrentUser().getUsername();
         List<CategoryResponse> categories = new ArrayList<>();
         int page = request.getPage();
@@ -38,26 +37,28 @@ public class CategoryRepositoryCustomImpl implements CategoryRepositoryCustom {
 
         StringBuilder sql = new StringBuilder("""
                 SELECT 
-                    id, 
-                    name, 
-                    type, 
-                    icon, 
-                    color,
-                    created_by
-                FROM categories
-                WHERE status = 1 
+                    c.id, 
+                    c.name, 
+                    c.type, 
+                    c.icon, 
+                    c.color,
+                    c.created_by,
+                    c.name_eng
+                FROM categories c
+                WHERE c.status = 1 
+                AND (c.created_by = :loginName OR c.created_by = 'system') 
                 """);
-        if (!ObjectUtils.isEmpty(request.getName())) {
-            sql.append(" AND name = :name ");
+        if (!ObjectUtils.isEmpty(request.getKeySearch())) {
+            sql.append(" AND (UPPER(c.name) like UPPER(:keySearch) " +
+                    " OR UPPER(c.name_eng) like UPPER(:keySearch) " +
+                    " ) ");
         }
 
         if (!ObjectUtils.isEmpty(request.getType())) {
-            sql.append(" AND type LIKE :type");
+            sql.append(" AND c.type = :type");
         }
 
-        sql.append(" AND (created_by = :loginName OR created_by = 'system') ");
-
-        sql.append(" ORDER BY pin DESC, updated_at DESC");
+        sql.append(" ORDER BY c.updated_at DESC ");
 
         String countSQL = "SELECT COUNT(*) FROM ( " + sql + " ) as total";
 
@@ -67,9 +68,9 @@ public class CategoryRepositoryCustomImpl implements CategoryRepositoryCustom {
         query.setParameter("loginName", username);
         queryCount.setParameter("loginName", username);
 
-        if (!ObjectUtils.isEmpty(request.getName())) {
-            query.setParameter("name", "%" + request.getName() + "%");
-            queryCount.setParameter("name", "%" + request.getName() + "%");
+        if (!ObjectUtils.isEmpty(request.getKeySearch())) {
+            query.setParameter("keySearch", "%" + request.getKeySearch() + "%");
+            queryCount.setParameter("keySearch", "%" + request.getKeySearch() + "%");
         }
 
         if (!ObjectUtils.isEmpty(request.getType())) {
@@ -86,11 +87,14 @@ public class CategoryRepositoryCustomImpl implements CategoryRepositoryCustom {
             for (Object[] item : result) {
                 CategoryResponse response = new CategoryResponse();
                 response.setId(item[0] != null ? (Long) item[0] : null);
-                response.setName(item[1] != null ? item[1].toString() : null);
+                response.setName(lang.equals("en")
+                        ? item[6] != null ? item[6].toString() : null
+                        : item[1] != null ? item[1].toString() : null);
                 response.setType(item[2] != null ? item[2].toString() : null);
                 response.setIcon(item[3] != null ? item[3].toString() : null);
                 response.setColor(item[4] != null ? item[4].toString() : null);
                 response.setCreatedBy(item[5] != null ? item[5].toString() : null);
+
                 categories.add(response);
             }
         }

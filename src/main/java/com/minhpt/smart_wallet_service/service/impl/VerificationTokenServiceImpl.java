@@ -58,7 +58,7 @@ public class VerificationTokenServiceImpl implements VerificationTokenService {
 
         User user = vt.getUser();
 
-        user.setIsEmailVerified(Constant.VERIFIED);
+        user.setVerified(Constant.VERIFIED);
 
         userRepository.save(user);
 

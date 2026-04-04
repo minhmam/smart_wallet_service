@@ -16,6 +16,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 
 @Component
 @RequiredArgsConstructor
@@ -37,10 +38,9 @@ public class JwtFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String header = request.getHeader("Authorization");
+        String token = resolveToken(header);
 
-        if (header != null && header.startsWith("Bearer ")) {
-
-            String token = header.substring(7);
+        if (token != null) {
 
             if (!jwtService.isValid(token)) {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -61,20 +61,45 @@ public class JwtFilter extends OncePerRequestFilter {
                 User user = userRepository.findByIdAndStatus(Long.valueOf(userId), Constant.NOT_DELETE)
                         .orElse(null);
 
-                if (user != null) {
-
-                    UsernamePasswordAuthenticationToken auth =
-                            new UsernamePasswordAuthenticationToken(
-                                    user,
-                                    null,
-                                    List.of(new SimpleGrantedAuthority(user.getRole()))
-                            );
-
-                    SecurityContextHolder.getContext().setAuthentication(auth);
+                if (user == null) {
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.setContentType("application/json");
+                    response.getWriter().write("""
+                            {
+                              "status": 401,
+                              "message": "User not found or inactive"
+                            }
+                            """);
+                    return;
                 }
+
+                UsernamePasswordAuthenticationToken auth =
+                        new UsernamePasswordAuthenticationToken(
+                                user,
+                                null,
+                                user.getRoleNames().stream()
+                                        .map(roleName -> new SimpleGrantedAuthority(Objects.requireNonNullElse(roleName, "ROLE_USER")))
+                                        .toList()
+                        );
+
+                SecurityContextHolder.getContext().setAuthentication(auth);
             }
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private String resolveToken(String header) {
+        if (header == null || header.isBlank()) {
+            return null;
+        }
+
+        if (header.startsWith("Bearer ")) {
+            String bearerToken = header.substring(7).trim();
+            return bearerToken.isBlank() ? null : bearerToken;
+        }
+
+        String rawToken = header.trim();
+        return rawToken.isBlank() ? null : rawToken;
     }
 }

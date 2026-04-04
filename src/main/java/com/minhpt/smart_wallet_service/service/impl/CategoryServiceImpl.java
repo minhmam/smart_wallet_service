@@ -26,16 +26,12 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public CategoryResponse create(CategoryCreateRequest req) {
-
         User loginUser = authenticationUtil.getCurrentUser();
-
-        if(loginUser == null){
-            throw new RuntimeException("Chưa có user login vào hệ thống");
-        }
 
         Category category = categoryMapper.toEntity(req);
         category.setCreatedBy(loginUser.getUsername());
         category.setUpdatedBy(loginUser.getUsername());
+        category.setNameEng(req.getName());
 
         return categoryMapper.toResponse(categoryRepository.save(category));
     }
@@ -45,7 +41,12 @@ public class CategoryServiceImpl implements CategoryService {
         User loginUser = authenticationUtil.getCurrentUser();
         Category updateCategory = categoryRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Category not found by ID = " + id));
-
+        if (updateCategory.getCreatedBy().equals("system")) {
+            throw new RuntimeException("Không thể cập nhật hạng mục do được tạo bởi hệ thống");
+        }
+        if (!updateCategory.getCreatedBy().equals(loginUser.getUsername())) {
+            throw new RuntimeException("Không thể cập nhật hạng mục do không phải người tạo");
+        }
         updateCategory.setName(req.getName());
         updateCategory.setType(req.getType());
         updateCategory.setIcon(req.getIcon());
@@ -59,9 +60,15 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public void delete(Long id) {
-
+        User loginUser = authenticationUtil.getCurrentUser();
         Category deleteCategory = categoryRepository.findByIdAndStatus(id, Constant.NOT_DELETE)
                 .orElseThrow(() -> new RuntimeException("Category not found by ID = " + id));
+        if (deleteCategory.getCreatedBy().equals("system")) {
+            throw new RuntimeException("Không thể xóa hạng mục do được tạo bởi hệ thống");
+        }
+        if (!deleteCategory.getCreatedBy().equals(loginUser.getUsername())) {
+            throw new RuntimeException("Không thể xóa hạng mục do không phải người tạo");
+        }
 
         deleteCategory.setStatus(Constant.DELETED);
         categoryRepository.save(deleteCategory);
@@ -86,21 +93,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public void changePin(Long id) {
-        Category category = categoryRepository.findByIdAndStatus(id, Constant.NOT_DELETE)
-                .orElseThrow(() -> new RuntimeException("Category not found by ID = " + id));
-        category.setPin(category.getPin() == 1 ? 0 : 1);
-        categoryRepository.save(category);
+    public Page<CategoryResponse> search(String lang, CategorySearchRequest request) {
+        return categoryRepository.search(lang, request);
     }
-
-    @Override
-    public Page<CategoryResponse> search(CategorySearchRequest request) {
-        return categoryRepository.search(request);
-    }
-
-    @Override
-    public List<CategoryResponse> getTop5MostUsedCategories() {
-        return categoryRepository.getTop5MostUsedCategories();
-    }
-
 }

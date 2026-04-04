@@ -8,7 +8,6 @@ import org.springframework.data.domain.Page;
 import java.util.List;
 
 public interface CategoryService {
-
     CategoryResponse create(CategoryCreateRequest req);
 
     CategoryResponse update(CategoryCreateRequest req, long id);
@@ -19,11 +18,5 @@ public interface CategoryService {
 
     CategoryResponse getDetail(Long categoryId);
 
-
-    void changePin(Long id);
-
-    Page<CategoryResponse> search(CategorySearchRequest request);
-
-    List<CategoryResponse> getTop5MostUsedCategories();
-
+    Page<CategoryResponse> search(String lang, CategorySearchRequest request);
 }

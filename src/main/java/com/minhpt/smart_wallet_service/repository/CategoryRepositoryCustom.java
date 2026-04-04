@@ -7,7 +7,7 @@ import org.springframework.data.domain.Page;
 import java.util.List;
 
 public interface CategoryRepositoryCustom {
-    Page<CategoryResponse> search(CategorySearchRequest request);
+    Page<CategoryResponse> search(String lang, CategorySearchRequest request);
 
     List<CategoryResponse> getTop5MostUsedCategories();
 }

@@ -3,14 +3,20 @@ package com.minhpt.smart_wallet_service.model;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "users")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -46,16 +52,52 @@ public class User extends BaseEntity {
     @Column(name = "provider_id")
     private String providerId;
 
-    @Column(name = "role")
-    private String role;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private Set<UserRole> userRoles = new LinkedHashSet<>();
 
-    @Column(name = "is_email_verified")
-    private int isEmailVerified;
-
-    @Column(name = "premium_status")
-    private int premiumStatus;
+    @Column(name = "verified")
+    private int verified;
 
     @Column(name = "premium_expired_at")
     private LocalDateTime premiumExpiredAt;
 
+    public Set<String> getRoleNames() {
+        Set<String> roleNames = userRoles.stream()
+                .map(UserRole::getRole)
+                .map(Role::getName)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+        return roleNames;
+    }
+
+    public void addRole(Role role) {
+        if (role == null || role.getId() == null) {
+            return;
+        }
+
+        boolean alreadyAssigned = userRoles.stream()
+                .anyMatch(userRole -> userRole.getRole() != null && role.getId().equals(userRole.getRole().getId()));
+
+        if (alreadyAssigned) {
+            return;
+        }
+
+        userRoles.add(
+                UserRole.builder()
+                        .id(new UserRoleId(this.id, role.getId()))
+                        .user(this)
+                        .role(role)
+                        .build()
+        );
+    }
+
+    public void replaceRoles(Set<Role> roles) {
+        this.userRoles.clear();
+
+        if (roles == null) {
+            return;
+        }
+
+        roles.forEach(this::addRole);
+    }
 }

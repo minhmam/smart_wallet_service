@@ -183,11 +183,6 @@ public class PaymentTransactionServiceImpl implements PaymentTransactionService 
     }
 
     private void createUserSubscriptionAndUpgradeUser(PaymentTransaction paymentTransaction) {
-
-//        if(userSubscriptionRepository.exitsByPaymentTransactionId(paymentTransaction.getId())){
-//            throw new RuntimeException("Đã tồn tại user subscription này rồi");
-//        }
-
         if (!Constant.STATE_SUCCESS.equalsIgnoreCase(paymentTransaction.getState())) {
             throw new RuntimeException("Chưa hoàn tất giao dịch với mã order thanh toán: " + paymentTransaction.getOrderCode());
         }
@@ -212,7 +207,6 @@ public class PaymentTransactionServiceImpl implements PaymentTransactionService 
 
         userSubscriptionRepository.save(userSubscription);
 
-        loginUser.setPremiumStatus(Constant.PREMIUM);
         loginUser.setPremiumExpiredAt(endDate);
 
         userRepository.save(loginUser);

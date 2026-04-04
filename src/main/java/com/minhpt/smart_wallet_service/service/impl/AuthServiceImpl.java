@@ -1,5 +1,6 @@
 package com.minhpt.smart_wallet_service.service.impl;
 
+import com.minhpt.smart_wallet_service.constant.Constant;
 import com.minhpt.smart_wallet_service.dto.request.LoginRequest;
 import com.minhpt.smart_wallet_service.dto.response.AuthResponse;
 import com.minhpt.smart_wallet_service.exception.AuthException;
@@ -25,12 +26,14 @@ public class AuthServiceImpl implements AuthService {
         User user = userRepository.findByUsername(req.getUsername())
                 .orElse(null);
 
-        if (user == null || !passwordEncoder.matches(req.getPassword(), user.getPassword())) {
+        if (user == null
+                || user.getStatus() != Constant.NOT_DELETE
+                || !passwordEncoder.matches(req.getPassword(), user.getPassword())) {
             throw new AuthException("Invalid credentials");
         }
 
         String token = jwtService.generateToken(user);
 
-        return new AuthResponse(token);
+        return new AuthResponse(token, user.getRoleNames());
     }
 }

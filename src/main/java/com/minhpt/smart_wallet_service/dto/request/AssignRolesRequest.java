@@ -1,16 +1,19 @@
 package com.minhpt.smart_wallet_service.dto.request;
 
+import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
+
+import java.util.Set;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CategorySearchRequest extends BaseRequest {
-    private String keySearch;
-    private String type;
+public class AssignRolesRequest {
+
+    @NotEmpty(message = "At least one role is required")
+    private Set<String> roleNames;
 }

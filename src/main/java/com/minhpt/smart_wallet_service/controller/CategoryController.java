@@ -22,8 +22,10 @@ public class CategoryController {
     private final CategoryService categoryService;
 
     @PostMapping("/search")
-    public ResponseEntity<ApiResponse<List<CategoryResponse>>> search(@RequestBody CategorySearchRequest req) {
-        Page<CategoryResponse> page = categoryService.search(req);
+    public ResponseEntity<ApiResponse<List<CategoryResponse>>> search(
+            @RequestParam(defaultValue = "vi") String lang,
+            @RequestBody CategorySearchRequest req) {
+        Page<CategoryResponse> page = categoryService.search(lang, req);
         return ResponseEntity.ok(
                 ApiResponse.<List<CategoryResponse>>builder()
                         .status(200)
@@ -84,17 +86,6 @@ public class CategoryController {
         categoryService.delete(id);
         return ResponseEntity.ok(
                 ApiResponse.<CategoryResponse>builder()
-                        .status(200)
-                        .message(Constant.SUCCESS)
-                        .build()
-        );
-    }
-
-    @PutMapping("/pin")
-    public ResponseEntity<Object> changePin(@RequestParam Long id) {
-        categoryService.changePin(id);
-        return ResponseEntity.ok(
-                ApiResponse.builder()
                         .status(200)
                         .message(Constant.SUCCESS)
                         .build()

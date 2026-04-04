@@ -6,15 +6,13 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+@Data
+@Builder
 @Entity
 @Table(name = "categories")
-@Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-
 public class Category extends BaseEntity {
-
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "categrorie_seq")
     @SequenceGenerator(
@@ -27,14 +25,14 @@ public class Category extends BaseEntity {
     @Column(name = "name")
     private String name;
 
+    @Column(name = "name_eng")
+    private String nameEng;
+
     @Column(name = "type")
     private String type;
 
     @Column(name = "icon")
     private String icon;
-
-    @Column(name = "pin")
-    private int pin;
 
     @Column(name = "color")
     private String color;

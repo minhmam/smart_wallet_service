@@ -1,6 +1,6 @@
 package com.minhpt.smart_wallet_service.security;
 
-import jakarta.servlet.http.HttpServletResponse;
+import com.minhpt.smart_wallet_service.constant.Constant;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,6 +17,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class SecurityConfig {
     private final JwtFilter jwtFilter;
+    private final JwtAuthenticationEntryPoint authenticationEntryPoint;
+    private final JwtAccessDeniedHandler accessDeniedHandler;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -34,24 +36,21 @@ public class SecurityConfig {
                 )
 
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/login").permitAll()
-                        .requestMatchers("/auth/register").permitAll()
-                        .requestMatchers("/auth/verify").permitAll()
+                        .requestMatchers("/auth/login", "/auth/register", "/auth/verify").permitAll()
                         .requestMatchers(
                                 "/api/v1/payment-transaction/vnpay-ipn",
                                 "/api/v1/payment-transaction/vnpay-return"
                         ).permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                        .anyRequest().authenticated()
+                        .requestMatchers("/api/v1/admin/**").hasAuthority(Constant.ROLE_ADMIN)
+                        .anyRequest().hasAnyAuthority(Constant.ROLE_USER, Constant.ROLE_ADMIN)
                 )
 
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
 
                 .exceptionHandling(ex -> ex
-                        .authenticationEntryPoint((request, response, authException) -> {
-                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                            response.getWriter().write("Unauthorized");
-                        })
+                        .authenticationEntryPoint(authenticationEntryPoint)
+                        .accessDeniedHandler(accessDeniedHandler)
                 );
 
         return http.build();
