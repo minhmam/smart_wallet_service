@@ -22,10 +22,22 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Locale;
 
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
+
+    private static final int MIN_USERNAME_LENGTH = 4;
+    private static final int MAX_USERNAME_LENGTH = 50;
+    private static final int MAX_EMAIL_LENGTH = 255;
+    private static final int MIN_PASSWORD_LENGTH = 8;
+    private static final int MAX_PASSWORD_LENGTH = 64;
+    private static final String USERNAME_PATTERN = "^[A-Za-z0-9._-]+$";
+    private static final String PASSWORD_UPPERCASE_PATTERN = ".*[A-Z].*";
+    private static final String PASSWORD_LOWERCASE_PATTERN = ".*[a-z].*";
+    private static final String PASSWORD_DIGIT_PATTERN = ".*\\d.*";
+    private static final String PASSWORD_SPECIAL_PATTERN = ".*[^A-Za-z0-9].*";
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
@@ -38,11 +50,13 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserResponse createUser(UserCreateRequest req) {
-
+        validateRegister(req);
         User user = userMapper.toEntity(req);
 
         user.setPassword(passwordEncoder.encode(req.getPassword()));
         user.setVerified(Constant.NOT_VERIFIED);
+        user.setCreatedBy(Constant.USER_DEFAULT);
+        user.setUpdatedBy(Constant.USER_DEFAULT);
 
         User savedUser = userRepository.save(user);
         Role defaultRole = getOrCreateRole(Constant.ROLE_USER);
@@ -60,6 +74,78 @@ public class UserServiceImpl implements UserService {
         verificationTokenService.sendVerifyEmail(savedUser);
 
         return userMapper.toResponse(savedUser);
+    }
+
+    private void validateRegister(UserCreateRequest req) {
+        if (req == null) {
+            throw new IllegalArgumentException("Register request must not be null");
+        }
+
+        String username = normalizeUsername(req.getUsername());
+        String email = normalizeEmail(req.getEmail());
+        String password = req.getPassword();
+
+        if (username.length() < MIN_USERNAME_LENGTH || username.length() > MAX_USERNAME_LENGTH) {
+            throw new IllegalArgumentException(
+                    "Username length must be between " + MIN_USERNAME_LENGTH + " and " + MAX_USERNAME_LENGTH + " characters"
+            );
+        }
+
+        if (!username.matches(USERNAME_PATTERN)) {
+            throw new IllegalArgumentException("Username may only contain letters, numbers, dot, underscore, or hyphen");
+        }
+
+        if (email.length() > MAX_EMAIL_LENGTH) {
+            throw new IllegalArgumentException("Email length must not exceed " + MAX_EMAIL_LENGTH + " characters");
+        }
+
+        if (password == null || password.isBlank()) {
+            throw new IllegalArgumentException("Password must not be blank");
+        }
+
+        if (password.contains(" ")) {
+            throw new IllegalArgumentException("Password must not contain spaces");
+        }
+
+        if (password.length() < MIN_PASSWORD_LENGTH || password.length() > MAX_PASSWORD_LENGTH) {
+            throw new IllegalArgumentException(
+                    "Password length must be between " + MIN_PASSWORD_LENGTH + " and " + MAX_PASSWORD_LENGTH + " characters"
+            );
+        }
+
+        if (!password.matches(PASSWORD_UPPERCASE_PATTERN)
+                || !password.matches(PASSWORD_LOWERCASE_PATTERN)
+                || !password.matches(PASSWORD_DIGIT_PATTERN)
+                || !password.matches(PASSWORD_SPECIAL_PATTERN)) {
+            throw new IllegalArgumentException(
+                    "Password must contain uppercase, lowercase, number, and special character"
+            );
+        }
+
+        if (userRepository.existsByUsernameIgnoreCase(username)) {
+            throw new IllegalArgumentException("Username already exists");
+        }
+
+        if (userRepository.existsByEmailIgnoreCase(email)) {
+            throw new IllegalArgumentException("Email already exists");
+        }
+
+        req.setUsername(username);
+        req.setEmail(email);
+    }
+
+    private String normalizeUsername(String username) {
+        if (username == null || username.isBlank()) {
+            throw new IllegalArgumentException("Username must not be blank");
+        }
+        return username.trim();
+    }
+
+    private String normalizeEmail(String email) {
+        if (email == null || email.isBlank()) {
+            throw new IllegalArgumentException("Email must not be blank");
+        }
+        return email.trim().toLowerCase(Locale.ROOT);
     }
 
     @Override

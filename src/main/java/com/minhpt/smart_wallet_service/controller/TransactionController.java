@@ -24,7 +24,9 @@ public class TransactionController {
     private final JsonMapper.Builder builder;
 
     @PostMapping("/search")
-    public ResponseEntity<ApiResponse<List<TransactionResponse>>> search(@RequestBody TransactionSearchRequest req) {
+    public ResponseEntity<ApiResponse<List<TransactionResponse>>> search(
+            @RequestBody TransactionSearchRequest req
+    ) {
         Page<TransactionResponse> page = transactionService.search(req);
         return ResponseEntity.ok(
                 ApiResponse.<List<TransactionResponse>>builder()

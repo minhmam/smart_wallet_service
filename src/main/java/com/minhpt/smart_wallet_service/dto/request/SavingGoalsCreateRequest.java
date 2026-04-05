@@ -4,6 +4,7 @@ import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -25,7 +26,7 @@ public class SavingGoalsCreateRequest {
     private BigDecimal targetAmount;
 
     @NotNull(message = "currentAmount Amount is required")
-    @Positive(message = "currentAmount Amount must be > 0")
+    @PositiveOrZero(message = "currentAmount Amount must be >= 0")
     private BigDecimal currentAmount;
 
     @NotNull(message = "Deadline is required")

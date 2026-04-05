@@ -36,8 +36,12 @@ public class TransactionRepositoryCustomImpl implements TransactionRepositoryCus
                 " t.category_id, " +
                 " t.user_id , " +
                 " t.transaction_date, " +
-                " t.ai_predicted " +
+                " t.ai_predicted, " +
+                " c.\"name\" category_name, " +
+                " c.color color, " +
+                " c.icon icon " +
                 " from transactions t " +
+                " left join categories c on t.category_id = c.id " +
                 " where t.STATUS = 1 ");
 
         if (!ObjectUtils.isEmpty(req.getKeySearch())) {
@@ -78,6 +82,9 @@ public class TransactionRepositoryCustomImpl implements TransactionRepositoryCus
                     .userId(item[5] != null ? ((Number) item[5]).longValue() : null)
                     .transactionDate(DataUtil.parseToLocalDateTime(item[6]))
                     .aiPredicted(item[7] != null && Boolean.parseBoolean(item[7].toString()))
+                    .categoryName(item[8] != null ? item[8].toString() : null)
+                    .color(item[9] != null ? item[9].toString() : null)
+                    .icon(item[10] != null ? item[10].toString() : null)
                     .build();
 
             transactionList.add(response);

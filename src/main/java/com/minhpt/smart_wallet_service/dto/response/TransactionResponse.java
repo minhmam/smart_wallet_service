@@ -21,4 +21,7 @@ public class TransactionResponse {
     private Long userId;
     private LocalDateTime transactionDate;
     private Boolean aiPredicted;
+    private String categoryName;
+    private String color;
+    private String icon;
 }

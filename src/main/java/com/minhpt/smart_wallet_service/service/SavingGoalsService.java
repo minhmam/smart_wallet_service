@@ -5,6 +5,7 @@ import com.minhpt.smart_wallet_service.dto.request.SavingGoalsSearchRequest;
 import com.minhpt.smart_wallet_service.dto.response.SavingGoalsResponse;
 import org.springframework.data.domain.Page;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public interface SavingGoalsService {
@@ -17,4 +18,6 @@ public interface SavingGoalsService {
     SavingGoalsResponse getDetails(Long id);
 
     void delete(Long id);
+
+    SavingGoalsResponse deposit(Long id, BigDecimal amount);
 }

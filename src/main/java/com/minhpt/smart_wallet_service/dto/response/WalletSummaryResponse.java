@@ -11,7 +11,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class WalletSumaryResponse {
+public class WalletSummaryResponse {
     private BigDecimal balance;
     private BigDecimal totalIncome;
     private BigDecimal totalExpense;

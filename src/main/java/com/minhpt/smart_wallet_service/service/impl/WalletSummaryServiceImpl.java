@@ -2,11 +2,12 @@ package com.minhpt.smart_wallet_service.service.impl;
 
 import com.minhpt.smart_wallet_service.dto.response.WalletPieChartItemResponse;
 import com.minhpt.smart_wallet_service.dto.response.WalletPieChartResponse;
-import com.minhpt.smart_wallet_service.dto.response.WalletSumaryResponse;
+import com.minhpt.smart_wallet_service.dto.response.WalletSummaryResponse;
+import com.minhpt.smart_wallet_service.model.AccountBalance;
 import com.minhpt.smart_wallet_service.model.User;
 import com.minhpt.smart_wallet_service.repository.AccountBalanceRepository;
 import com.minhpt.smart_wallet_service.repository.TransactionRepository;
-import com.minhpt.smart_wallet_service.service.WalletSumaryService;
+import com.minhpt.smart_wallet_service.service.WalletSummaryService;
 import com.minhpt.smart_wallet_service.util.AuthenticationUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,7 +20,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class WalletSummaryServiceImpl implements WalletSumaryService {
+public class WalletSummaryServiceImpl implements WalletSummaryService {
 
     private static final int TOP_CATEGORY_LIMIT = 5;
     private static final String OTHER_CATEGORY_NAME = "Khác";
@@ -30,18 +31,19 @@ public class WalletSummaryServiceImpl implements WalletSumaryService {
     private final AuthenticationUtil authenticationUtil;
 
     @Override
-    public WalletSumaryResponse getWalletSummary() {
-
+    public WalletSummaryResponse getWalletSummary() {
         User loginUser = authenticationUtil.getCurrentUser();
 
-        BigDecimal totalIncome = transactionRepository.getTotalIncomeByUserId(loginUser.getId());
-        BigDecimal totalExpense = transactionRepository.getTotalExpenseByUserId(loginUser.getId());
+        BigDecimal totalIncome = transactionRepository.getTotalIncomeByUserId(loginUser.getUsername());
+        BigDecimal totalExpense = transactionRepository.getTotalExpenseByUserId(loginUser.getUsername());
         BigDecimal balance = accountBalanceRepository.findByUserId(loginUser.getId())
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy thanh khoản ứng với userId = " + loginUser.getId())).getBalance();
+                .orElse(new AccountBalance()).getBalance();
 
-        WalletSumaryResponse walletSumaryResponse = new WalletSumaryResponse(balance, totalIncome, totalExpense);
-
-        return walletSumaryResponse;
+        return WalletSummaryResponse.builder()
+                .balance(balance)
+                .totalIncome(totalIncome)
+                .totalExpense(totalExpense)
+                .build();
     }
 
     @Override

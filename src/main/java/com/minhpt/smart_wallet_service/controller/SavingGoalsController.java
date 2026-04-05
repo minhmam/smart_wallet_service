@@ -3,6 +3,7 @@ package com.minhpt.smart_wallet_service.controller;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.minhpt.smart_wallet_service.common.ApiResponse;
 import com.minhpt.smart_wallet_service.constant.Constant;
+import com.minhpt.smart_wallet_service.dto.request.AmountRequest;
 import com.minhpt.smart_wallet_service.dto.request.SavingGoalsCreateRequest;
 import com.minhpt.smart_wallet_service.dto.request.SavingGoalsSearchRequest;
 import com.minhpt.smart_wallet_service.dto.response.SavingGoalsResponse;
@@ -76,6 +77,20 @@ public class SavingGoalsController {
                 ApiResponse.<SavingGoalsResponse>builder()
                         .status(200)
                         .message(Constant.SUCCESS)
+                        .build()
+        );
+    }
+
+    @PostMapping("/{id}/deposit")
+    public ResponseEntity<ApiResponse<SavingGoalsResponse>> deposit(
+            @PathVariable Long id,
+            @Valid @RequestBody AmountRequest request
+    ) {
+        return ResponseEntity.ok(
+                ApiResponse.<SavingGoalsResponse>builder()
+                        .status(200)
+                        .message(Constant.SUCCESS)
+                        .data(savingGoalsService.deposit(id, request.getAmount()))
                         .build()
         );
     }

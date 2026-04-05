@@ -1,11 +1,11 @@
 package com.minhpt.smart_wallet_service.service;
 
 import com.minhpt.smart_wallet_service.dto.response.WalletPieChartResponse;
-import com.minhpt.smart_wallet_service.dto.response.WalletSumaryResponse;
+import com.minhpt.smart_wallet_service.dto.response.WalletSummaryResponse;
 
-public interface WalletSumaryService {
+public interface WalletSummaryService {
 
-    WalletSumaryResponse getWalletSummary();
+    WalletSummaryResponse getWalletSummary();
 
     WalletPieChartResponse getPieChart(Integer month, Integer year, String type);
 }

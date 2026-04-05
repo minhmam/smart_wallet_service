@@ -22,19 +22,19 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
             select coalesce(sum(t.amount), 0)
             from transactions t
             where t.status = 1
-              and t.user_id = :userId
+              and t.created_by = :username
               and t.type = 'INCOME'
             """, nativeQuery = true)
-    BigDecimal getTotalIncomeByUserId(Long userId);
+    BigDecimal getTotalIncomeByUserId(String username);
 
     @Query(value = """
             select coalesce(sum(t.amount), 0)
             from transactions t
             where t.status = 1
-              and t.user_id = :userId
+              and t.created_by = :username
               and t.type = 'EXPENSE'
             """, nativeQuery = true)
-    BigDecimal getTotalExpenseByUserId(Long userId);
+    BigDecimal getTotalExpenseByUserId(String username);
 
     List<Transaction> findByTypeAndUserIdAndStatus(String type, Long userId, Integer status);
 

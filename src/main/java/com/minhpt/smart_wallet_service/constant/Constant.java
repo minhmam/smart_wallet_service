@@ -19,4 +19,17 @@ public class Constant {
     public static final String STATE_SUCCESS = "SUCCESS";
     public static final String STATE_FAILED = "FAILED";
     public static final int PREMIUM = 1;
+    public static final String SCHEDULE_ACTION_TRANSACTION = "TRANSACTION";
+    public static final String SCHEDULE_ACTION_GOAL_DEPOSIT = "GOAL_DEPOSIT";
+    public static final String SCHEDULE_FREQUENCY_DAILY = "DAILY";
+    public static final String SCHEDULE_FREQUENCY_WEEKLY = "WEEKLY";
+    public static final String SCHEDULE_FREQUENCY_MONTHLY = "MONTHLY";
+    public static final String SCHEDULE_STATE_PENDING = "PENDING";
+    public static final String SCHEDULE_STATE_PROCESSING = "PROCESSING";
+    public static final String SCHEDULE_STATE_SUCCESS = "SUCCESS";
+    public static final String SCHEDULE_STATE_FAILED = "FAILED";
+    public static final String SCHEDULE_STATE_CANCELED = "CANCELED";
+    public static final String SCHEDULE_STATE_COMPLETED = "COMPLETED";
+    public static final String SCHEDULE_EXECUTION_SUCCESS = "SUCCESS";
+    public static final String SCHEDULE_EXECUTION_FAILED = "FAILED";
 }
