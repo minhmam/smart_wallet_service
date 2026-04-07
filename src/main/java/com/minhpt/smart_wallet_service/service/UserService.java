@@ -8,7 +8,7 @@ public interface UserService {
 
     UserResponse createUser(UserCreateRequest request);
 
-    UserResponse updateUser(UserUpdateRequest request);
+    UserResponse update(UserUpdateRequest request);
 
-    UserResponse getById();
+    UserResponse getCurrentUser();
 }

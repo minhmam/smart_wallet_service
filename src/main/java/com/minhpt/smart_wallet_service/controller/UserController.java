@@ -11,7 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/user")
 @RequiredArgsConstructor
 public class UserController {
 
@@ -23,7 +23,18 @@ public class UserController {
                 ApiResponse.<UserResponse>builder()
                         .status(200)
                         .message("Update successfully")
-                        .data(userService.updateUser(req))
+                        .data(userService.update(req))
+                        .build()
+        );
+    }
+
+    @GetMapping("/detail")
+    public ResponseEntity<ApiResponse<UserResponse>> getCurrentUser() {
+        return ResponseEntity.ok(
+                ApiResponse.<UserResponse>builder()
+                        .status(200)
+                        .message("Update successfully")
+                        .data(userService.getCurrentUser())
                         .build()
         );
     }

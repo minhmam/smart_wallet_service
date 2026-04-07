@@ -171,7 +171,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserResponse updateUser(UserUpdateRequest req) {
+    public UserResponse update(UserUpdateRequest req) {
         if (req == null) {
             throw new IllegalArgumentException("Update request must not be null");
         }
@@ -203,7 +203,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponse getById() {
+    public UserResponse getCurrentUser() {
         User userLogin = authenticationUtil.getCurrentUser();
 
         User detailUser = userRepository.findById(userLogin.getId())
