@@ -3,10 +3,12 @@ package com.minhpt.smart_wallet_service.repository.impl;
 import com.minhpt.smart_wallet_service.dto.request.TransactionSearchRequest;
 import com.minhpt.smart_wallet_service.dto.response.TransactionResponse;
 import com.minhpt.smart_wallet_service.repository.TransactionRepositoryCustom;
+import com.minhpt.smart_wallet_service.util.AuthenticationUtil;
 import com.minhpt.smart_wallet_service.util.DataUtil;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -18,7 +20,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Repository
+@RequiredArgsConstructor
 public class TransactionRepositoryCustomImpl implements TransactionRepositoryCustom {
+    private final AuthenticationUtil authenticationUtil;
+
     @PersistenceContext
     private EntityManager em;
 
@@ -42,7 +47,8 @@ public class TransactionRepositoryCustomImpl implements TransactionRepositoryCus
                 " c.icon icon " +
                 " from transactions t " +
                 " left join categories c on t.category_id = c.id " +
-                " where t.STATUS = 1 ");
+                " where t.STATUS = 1 " +
+                " and t.created_by = :username ");
 
         if (!ObjectUtils.isEmpty(req.getKeySearch())) {
             sql.append(" and (upper(t.description) like upper(:keySearch)) ");
@@ -56,6 +62,9 @@ public class TransactionRepositoryCustomImpl implements TransactionRepositoryCus
 
         Query query = em.createNativeQuery(sql.toString());
         Query queryCount = em.createNativeQuery("SELECT COUNT(*) FROM (" + sql + ") as total");
+
+        query.setParameter("username", authenticationUtil.getCurrentUser().getUsername());
+        queryCount.setParameter("username", authenticationUtil.getCurrentUser().getUsername());
 
         if (!ObjectUtils.isEmpty(req.getKeySearch())) {
             query.setParameter("keySearch", "%" + req.getKeySearch() + "%");

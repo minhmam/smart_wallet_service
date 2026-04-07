@@ -1,6 +1,9 @@
 package com.minhpt.smart_wallet_service.security;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.minhpt.smart_wallet_service.common.ApiResponse;
 import com.minhpt.smart_wallet_service.constant.Constant;
+import com.minhpt.smart_wallet_service.i18n.MessageResolver;
 import com.minhpt.smart_wallet_service.model.User;
 import com.minhpt.smart_wallet_service.repository.UserRepository;
 import jakarta.servlet.FilterChain;
@@ -11,11 +14,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 @Component
@@ -24,6 +31,8 @@ public class JwtFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final UserRepository userRepository;
+    private final ObjectMapper objectMapper;
+    private final MessageResolver messageResolver;
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
@@ -41,16 +50,14 @@ public class JwtFilter extends OncePerRequestFilter {
         String token = resolveToken(header);
 
         if (token != null) {
+            Locale requestLocale = messageResolver.resolveLocale(request);
 
             if (!jwtService.isValid(token)) {
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                response.setContentType("application/json");
-                response.getWriter().write("""
-                        {
-                          "status": 401,
-                          "message": "Invalid or expired token"
-                        }
-                        """);
+                writeUnauthorizedResponse(
+                        request,
+                        response,
+                        messageResolver.get(requestLocale, "security.token.invalid_or_expired")
+                );
                 return;
             }
 
@@ -62,14 +69,11 @@ public class JwtFilter extends OncePerRequestFilter {
                         .orElse(null);
 
                 if (user == null) {
-                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                    response.setContentType("application/json");
-                    response.getWriter().write("""
-                            {
-                              "status": 401,
-                              "message": "User not found or inactive"
-                            }
-                            """);
+                    writeUnauthorizedResponse(
+                            request,
+                            response,
+                            messageResolver.get(requestLocale, "security.user.not_found_or_inactive")
+                    );
                     return;
                 }
 
@@ -87,6 +91,24 @@ public class JwtFilter extends OncePerRequestFilter {
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private void writeUnauthorizedResponse(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            String message
+    ) throws IOException {
+        ApiResponse<Object> body = ApiResponse.builder()
+                .status(HttpServletResponse.SC_UNAUTHORIZED)
+                .message(message)
+                .timestamp(LocalDateTime.now())
+                .path(request.getRequestURI())
+                .build();
+
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+        objectMapper.writeValue(response.getWriter(), body);
     }
 
     private String resolveToken(String header) {
