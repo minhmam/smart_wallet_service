@@ -3,6 +3,7 @@ package com.minhpt.smart_wallet_service.service.impl;
 import com.minhpt.smart_wallet_service.dto.response.WalletPieChartItemResponse;
 import com.minhpt.smart_wallet_service.dto.response.WalletPieChartResponse;
 import com.minhpt.smart_wallet_service.dto.response.WalletSummaryResponse;
+import com.minhpt.smart_wallet_service.i18n.MessageResolver;
 import com.minhpt.smart_wallet_service.model.AccountBalance;
 import com.minhpt.smart_wallet_service.model.User;
 import com.minhpt.smart_wallet_service.repository.AccountBalanceRepository;
@@ -23,12 +24,13 @@ import java.util.List;
 public class WalletSummaryServiceImpl implements WalletSummaryService {
 
     private static final int TOP_CATEGORY_LIMIT = 5;
-    private static final String OTHER_CATEGORY_NAME = "Khác";
+    private static final String OTHER_CATEGORY_KEY = "wallet.category.other";
     private static final String DEFAULT_OTHER_COLOR = "#9CA3AF";
 
     private final AccountBalanceRepository accountBalanceRepository;
     private final TransactionRepository transactionRepository;
     private final AuthenticationUtil authenticationUtil;
+    private final MessageResolver messageResolver;
 
     @Override
     public WalletSummaryResponse getWalletSummary() {
@@ -68,7 +70,7 @@ public class WalletSummaryServiceImpl implements WalletSummaryService {
             items.add(
                     WalletPieChartItemResponse.builder()
                             .categoryId(rawItem[0] != null ? ((Number) rawItem[0]).longValue() : null)
-                            .categoryName(rawItem[1] != null ? rawItem[1].toString() : OTHER_CATEGORY_NAME)
+                            .categoryName(rawItem[1] != null ? rawItem[1].toString() : resolveOtherCategoryName())
                             .icon(rawItem[2] != null ? rawItem[2].toString() : null)
                             .color(rawItem[3] != null ? rawItem[3].toString() : null)
                             .amount(amount)
@@ -122,7 +124,7 @@ public class WalletSummaryServiceImpl implements WalletSummaryService {
             topItems.add(
                     WalletPieChartItemResponse.builder()
                             .categoryId(null)
-                            .categoryName(OTHER_CATEGORY_NAME)
+                            .categoryName(resolveOtherCategoryName())
                             .icon(null)
                             .color(DEFAULT_OTHER_COLOR)
                             .amount(otherAmount)
@@ -148,5 +150,9 @@ public class WalletSummaryServiceImpl implements WalletSummaryService {
                     .divide(totalAmount, 2, RoundingMode.HALF_UP);
             item.setPercentage(percentage);
         }
+    }
+
+    private String resolveOtherCategoryName() {
+        return messageResolver.get(OTHER_CATEGORY_KEY);
     }
 }

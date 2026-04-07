@@ -21,7 +21,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.Locale;
 
 @Service
@@ -33,6 +32,7 @@ public class UserServiceImpl implements UserService {
     private static final int MAX_EMAIL_LENGTH = 255;
     private static final int MIN_PASSWORD_LENGTH = 8;
     private static final int MAX_PASSWORD_LENGTH = 64;
+    private static final int MAX_FULL_NAME_LENGTH = 100;
     private static final String USERNAME_PATTERN = "^[A-Za-z0-9._-]+$";
     private static final String PASSWORD_UPPERCASE_PATTERN = ".*[A-Z].*";
     private static final String PASSWORD_LOWERCASE_PATTERN = ".*[a-z].*";
@@ -148,31 +148,58 @@ public class UserServiceImpl implements UserService {
         return email.trim().toLowerCase(Locale.ROOT);
     }
 
+    private String normalizeFullName(String fullName) {
+        if (fullName == null || fullName.isBlank()) {
+            throw new IllegalArgumentException("Full name must not be blank");
+        }
+
+        String normalizedFullName = fullName.trim();
+        if (normalizedFullName.length() > MAX_FULL_NAME_LENGTH) {
+            throw new IllegalArgumentException("Full name must not exceed " + MAX_FULL_NAME_LENGTH + " characters");
+        }
+
+        return normalizedFullName;
+    }
+
+    private String normalizePhoneNumber(String phoneNumber) {
+        if (phoneNumber == null || phoneNumber.isBlank()) {
+            throw new IllegalArgumentException("Phone number must not be blank");
+        }
+
+        return phoneNumber.trim();
+    }
+
     @Override
+    @Transactional
     public UserResponse updateUser(UserUpdateRequest req) {
+        if (req == null) {
+            throw new IllegalArgumentException("Update request must not be null");
+        }
+
         User userLogin = authenticationUtil.getCurrentUser();
 
         User updateUser = userRepository.findById(userLogin.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found by ID = " + userLogin.getId()));
 
+        boolean hasChanges = false;
+
         if (req.getFullName() != null) {
-            updateUser.setFullName(req.getFullName());
+            updateUser.setFullName(normalizeFullName(req.getFullName()));
+            hasChanges = true;
         }
 
         if (req.getPhoneNumber() != null) {
-            updateUser.setPhoneNumber(req.getPhoneNumber());
+            updateUser.setPhoneNumber(normalizePhoneNumber(req.getPhoneNumber()));
+            hasChanges = true;
         }
 
-        if (req.getEmail() != null) {
-            updateUser.setEmail(req.getEmail());
+        if (!hasChanges) {
+            throw new IllegalArgumentException("At least one field must be provided");
         }
 
-        updateUser.setUpdatedAt(LocalDateTime.now());
-        updateUser.setUpdatedBy("system");
+        updateUser.setUpdatedBy(userLogin.getUsername());
 
-        userRepository.save(updateUser);
-
-        return userMapper.toResponse(updateUser);
+        return userMapper.toResponse(userRepository.save(updateUser));
     }
 
     @Override
