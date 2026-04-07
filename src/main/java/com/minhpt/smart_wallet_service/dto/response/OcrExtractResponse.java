@@ -5,13 +5,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class OcrExtractResponse {
     private String text;
-    private List<OcrTransactionResponse> transactions;
+    private OcrTransactionResponse transaction;
 }

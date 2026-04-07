@@ -106,6 +106,7 @@ public class MessageResolver {
             Map.entry("Không parse được phản hồi từ OpenAI", "error.openai.parse_failed"),
             Map.entry("OpenAI request bị gián đoạn", "error.openai.interrupted"),
             Map.entry("OpenAI không trả về nội dung transaction hợp lệ", "error.openai.invalid_transaction_content"),
+            Map.entry("OpenAI không trả về transaction hợp lệ", "error.openai.invalid_transaction_content"),
             Map.entry("OpenAI API key chưa được cấu hình", "error.openai.api_key_missing"),
             Map.entry("OpenAI không trả về danh sách transaction", "error.openai.transactions_missing"),
             Map.entry("OpenAI trả về categoryId không tồn tại trong danh sách category", "error.openai.category_id_invalid"),

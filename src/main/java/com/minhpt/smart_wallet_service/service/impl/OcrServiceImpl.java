@@ -1,7 +1,8 @@
 package com.minhpt.smart_wallet_service.service.impl;
 
 import com.minhpt.smart_wallet_service.constant.Constant;
-import com.minhpt.smart_wallet_service.dto.response.OcrExtractResponse;
+import com.minhpt.smart_wallet_service.dto.response.OcrTransactionDraftResponse;
+import com.minhpt.smart_wallet_service.dto.response.OcrTransactionResponse;
 import com.minhpt.smart_wallet_service.model.Category;
 import com.minhpt.smart_wallet_service.model.User;
 import com.minhpt.smart_wallet_service.repository.CategoryRepository;
@@ -16,11 +17,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class OcrServiceImpl implements OcrService {
+    private static final DateTimeFormatter OCR_DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     private final OcrTransactionAiExtractor ocrTransactionAiExtractor;
     private final CategoryRepository categoryRepository;
@@ -60,7 +66,7 @@ public class OcrServiceImpl implements OcrService {
     }
 
     @Override
-    public OcrExtractResponse extractTransactions(MultipartFile multipartFile) {
+    public OcrTransactionDraftResponse extractTransaction(MultipartFile multipartFile) {
         String text = extractText(multipartFile);
         User currentUser = authenticationUtil.getCurrentUser();
         List<Category> categories = categoryRepository.findTop10ByStatusOrderByIdAsc(Constant.NOT_DELETE);
@@ -70,9 +76,17 @@ public class OcrServiceImpl implements OcrService {
             accountName = currentUser.getUsername();
         }
 
-        return OcrExtractResponse.builder()
-                .text(text)
-                .transactions(ocrTransactionAiExtractor.extractTransactions(text, accountName, categories))
+        OcrTransactionResponse extractedTransaction = ocrTransactionAiExtractor.extractTransaction(text, accountName, categories);
+
+        return OcrTransactionDraftResponse.builder()
+                .amount(extractedTransaction.getAmount() == null
+                        ? null
+                        : BigDecimal.valueOf(extractedTransaction.getAmount()))
+                .type(extractedTransaction.getType())
+                .description(extractedTransaction.getDescription())
+                .categoryId(extractedTransaction.getCategoryId())
+                .transactionDate(parseTransactionDate(extractedTransaction.getTransactionDate()))
+                .aiPredicted(Boolean.TRUE)
                 .build();
     }
 
@@ -85,5 +99,13 @@ public class OcrServiceImpl implements OcrService {
         if (contentType == null || !contentType.startsWith("image/")) {
             throw new IllegalArgumentException("Only image files are supported");
         }
+    }
+
+    private LocalDateTime parseTransactionDate(String transactionDate) {
+        if (transactionDate == null || transactionDate.isBlank()) {
+            return null;
+        }
+
+        return LocalDate.parse(transactionDate, OCR_DATE_FORMATTER).atStartOfDay();
     }
 }

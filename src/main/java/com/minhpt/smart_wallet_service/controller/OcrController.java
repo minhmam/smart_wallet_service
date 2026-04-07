@@ -2,7 +2,7 @@ package com.minhpt.smart_wallet_service.controller;
 
 import com.minhpt.smart_wallet_service.common.ApiResponse;
 import com.minhpt.smart_wallet_service.constant.Constant;
-import com.minhpt.smart_wallet_service.dto.response.OcrExtractResponse;
+import com.minhpt.smart_wallet_service.dto.response.OcrTransactionDraftResponse;
 import com.minhpt.smart_wallet_service.service.OcrService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -21,13 +21,11 @@ public class OcrController {
 
     @PostMapping("/extract")
     public ResponseEntity<?> extract(@RequestParam("file") MultipartFile file) {
-
-        OcrExtractResponse response = ocrService.extractTransactions(file);
         return ResponseEntity.ok(
-                ApiResponse.<OcrExtractResponse>builder()
+                ApiResponse.<OcrTransactionDraftResponse>builder()
                         .status(200)
                         .message(Constant.SUCCESS)
-                        .data(response)
+                        .data(ocrService.extractTransaction(file))
                         .build()
         );
     }

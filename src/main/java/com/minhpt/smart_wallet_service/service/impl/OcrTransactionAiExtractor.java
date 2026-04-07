@@ -1,7 +1,6 @@
 package com.minhpt.smart_wallet_service.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -9,7 +8,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.minhpt.smart_wallet_service.dto.response.OcrTransactionResponse;
 import com.minhpt.smart_wallet_service.model.Category;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -29,8 +27,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class OcrTransactionAiExtractor {
-
-    private static final String DEFAULT_OPENAI_BASE_URL = "https://api.openai.com/v1/responses";
+    private static final String DEFAULT_OPENAI_BASE_URL = "https://api.openai.com/v1";
     private static final String TRANSACTION_DATE_REGEX = "^(0[1-9]|[12][0-9]|3[01])/(0[1-9]|1[0-2])/\\d{4}$";
 
     private final ObjectMapper objectMapper;
@@ -48,7 +45,7 @@ public class OcrTransactionAiExtractor {
             .connectTimeout(Duration.ofSeconds(20))
             .build();
 
-    public List<OcrTransactionResponse> extractTransactions(
+    public OcrTransactionResponse extractTransaction(
             String inputText,
             String accountName,
             List<Category> categories
@@ -63,7 +60,7 @@ public class OcrTransactionAiExtractor {
             String requestBody = objectMapper.writeValueAsString(buildRequestBody(inputText, accountName, categories));
 
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(openAiBaseUrl))
+                    .uri(URI.create(resolveResponsesEndpoint()))
                     .timeout(Duration.ofSeconds(60))
                     .header(HttpHeaders.AUTHORIZATION, "Bearer " + openAiApiKey)
                     .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
@@ -77,10 +74,9 @@ public class OcrTransactionAiExtractor {
             }
 
             String outputText = extractOutputText(response.body());
-            List<OcrTransactionResponse> transactions = objectMapper.readValue(outputText, new TypeReference<>() {
-            });
-            validateTransactions(transactions, categories);
-            return transactions;
+            OcrTransactionResponse transaction = parseTransaction(outputText);
+            validateTransaction(transaction, categories);
+            return transaction;
         } catch (IOException e) {
             throw new RuntimeException("Không parse được phản hồi từ OpenAI", e);
         } catch (InterruptedException e) {
@@ -115,7 +111,7 @@ public class OcrTransactionAiExtractor {
         ObjectNode text = requestBody.putObject("text");
         ObjectNode format = text.putObject("format");
         format.put("type", "json_schema");
-        format.put("name", "ocr_transactions");
+        format.put("name", "ocr_transaction");
         format.put("strict", true);
         format.set("schema", buildSchema());
 
@@ -124,12 +120,8 @@ public class OcrTransactionAiExtractor {
 
     private ObjectNode buildSchema() {
         ObjectNode root = objectMapper.createObjectNode();
-        root.put("type", "array");
-
-        ObjectNode item = root.putObject("items");
-        item.put("type", "object");
-
-        ObjectNode properties = item.putObject("properties");
+        root.put("type", "object");
+        ObjectNode properties = root.putObject("properties");
         properties.putObject("categoryId").put("type", "integer");
         properties.putObject("description").put("type", "string");
         properties.putObject("amount").put("type", "integer");
@@ -146,14 +138,14 @@ public class OcrTransactionAiExtractor {
         enums.add("INCOME");
         enums.add("EXPENSE");
 
-        ArrayNode required = item.putArray("required");
+        ArrayNode required = root.putArray("required");
         required.add("categoryId");
         required.add("description");
         required.add("amount");
         required.add("transactionDate");
         required.add("type");
 
-        item.put("additionalProperties", false);
+        root.put("additionalProperties", false);
         return root;
     }
 
@@ -179,23 +171,24 @@ public class OcrTransactionAiExtractor {
         return """
                 Bạn là AI chuyên trích xuất dữ liệu tài chính từ văn bản.
                 
-                Hãy chuyển đoạn text dưới đây thành JSON theo đúng format:
+                Hãy tổng hợp toàn bộ nội dung OCR thành duy nhất 1 object JSON transaction theo đúng format:
                 
-                [
-                  {
-                    "categoryId": number,
-                    "description": string,
-                    "amount": number,
-                    "transactionDate": "dd/MM/yyyy",
-                    "type": "INCOME" | "EXPENSE"
-                  }
-                ]
+                {
+                  "categoryId": number,
+                  "description": string,
+                  "amount": number,
+                  "transactionDate": "dd/MM/yyyy",
+                  "type": "INCOME" | "EXPENSE"
+                }
                 
                 Yêu cầu:
-                - CHỈ trả về JSON, không giải thích, không thêm text khác
+                - CHỈ trả về 1 object JSON duy nhất, không giải thích, không thêm text khác
+                - Chỉ tổng hợp thành 1 transaction đại diện cho toàn bộ chứng từ hoặc thông báo
+                - Nếu có nhiều dòng hàng hoặc nhiều mục nhỏ trong cùng một hóa đơn, hãy cộng gộp thành 1 transaction
+                - Nếu có nhiều con số, ưu tiên số tiền tổng cuối cùng hoặc số tiền giao dịch thực tế; không lấy số dư tài khoản
                 - amount là số nguyên (loại bỏ dấu phẩy, dấu chấm phân cách)
                 - transactionDate phải đúng định dạng dd/MM/yyyy (nếu không có thì để null)
-                - description là mô tả ngắn gọn nội dung giao dịch
+                - description là mô tả ngắn gọn cho giao dịch tổng hợp
                 - categoryId phải chọn từ danh sách category bên dưới bằng ID thật, không tự tạo ID mới
                 
                 categoryId map:
@@ -237,7 +230,31 @@ public class OcrTransactionAiExtractor {
             }
         }
 
-        throw new RuntimeException("OpenAI không trả về nội dung transaction hợp lệ");
+        throw new RuntimeException("OpenAI không trả về transaction hợp lệ");
+    }
+
+    private OcrTransactionResponse parseTransaction(String outputText) throws JsonProcessingException {
+        JsonNode root = objectMapper.readTree(outputText);
+
+        if (root.isObject()) {
+            JsonNode wrappedTransaction = root.path("transaction");
+            if (wrappedTransaction.isObject()) {
+                return objectMapper.convertValue(wrappedTransaction, OcrTransactionResponse.class);
+            }
+
+            return objectMapper.convertValue(root, OcrTransactionResponse.class);
+        }
+
+        JsonNode transactionsNode = root.path("transactions");
+        if (transactionsNode.isArray() && !transactionsNode.isEmpty()) {
+            return objectMapper.convertValue(transactionsNode.get(0), OcrTransactionResponse.class);
+        }
+
+        if (root.isArray() && !root.isEmpty()) {
+            return objectMapper.convertValue(root.get(0), OcrTransactionResponse.class);
+        }
+
+        throw new RuntimeException("OpenAI không trả về transaction hợp lệ");
     }
 
     private String resolveOpenAiErrorMessage(String responseBody, int statusCode) {
@@ -250,6 +267,14 @@ public class OcrTransactionAiExtractor {
         } catch (JsonProcessingException ignored) {
         }
 
+        if (responseBody != null && !responseBody.isBlank()) {
+            String compactBody = responseBody.replaceAll("\\s+", " ").trim();
+            if (compactBody.length() > 300) {
+                compactBody = compactBody.substring(0, 300) + "...";
+            }
+            return "OpenAI request failed (%s): %s".formatted(statusCode, compactBody);
+        }
+
         return "OpenAI request failed with status " + statusCode;
     }
 
@@ -259,37 +284,53 @@ public class OcrTransactionAiExtractor {
         }
     }
 
-    private void validateTransactions(List<OcrTransactionResponse> transactions, List<Category> categories) {
-        if (transactions == null) {
-            throw new RuntimeException("OpenAI không trả về danh sách transaction");
+    private void validateTransaction(OcrTransactionResponse transaction, List<Category> categories) {
+        if (transaction == null) {
+            throw new RuntimeException("OpenAI không trả về transaction hợp lệ");
         }
 
         Set<Long> validCategoryIds = categories.stream()
                 .map(Category::getId)
                 .collect(Collectors.toSet());
 
-        for (OcrTransactionResponse transaction : transactions) {
-            if (transaction.getCategoryId() == null || !validCategoryIds.contains(transaction.getCategoryId())) {
-                throw new RuntimeException("OpenAI trả về categoryId không tồn tại trong danh sách category");
-            }
-
-            if (transaction.getDescription() == null || transaction.getDescription().isBlank()) {
-                throw new RuntimeException("OpenAI trả về description rỗng");
-            }
-
-            if (transaction.getAmount() == null || transaction.getAmount() < 0) {
-                throw new RuntimeException("OpenAI trả về amount không hợp lệ");
-            }
-
-            if (transaction.getType() == null ||
-                    (!"INCOME".equals(transaction.getType()) && !"EXPENSE".equals(transaction.getType()))) {
-                throw new RuntimeException("OpenAI trả về type không hợp lệ");
-            }
-
-            if (transaction.getTransactionDate() != null &&
-                    !transaction.getTransactionDate().matches(TRANSACTION_DATE_REGEX)) {
-                throw new RuntimeException("OpenAI trả về transactionDate không đúng định dạng dd/MM/yyyy");
-            }
+        if (transaction.getCategoryId() == null || !validCategoryIds.contains(transaction.getCategoryId())) {
+            throw new RuntimeException("OpenAI trả về categoryId không tồn tại trong danh sách category");
         }
+
+        if (transaction.getDescription() == null || transaction.getDescription().isBlank()) {
+            throw new RuntimeException("OpenAI trả về description rỗng");
+        }
+
+        if (transaction.getAmount() == null || transaction.getAmount() < 0) {
+            throw new RuntimeException("OpenAI trả về amount không hợp lệ");
+        }
+
+        if (transaction.getType() == null ||
+                (!"INCOME".equals(transaction.getType()) && !"EXPENSE".equals(transaction.getType()))) {
+            throw new RuntimeException("OpenAI trả về type không hợp lệ");
+        }
+
+        if (transaction.getTransactionDate() != null &&
+                !transaction.getTransactionDate().matches(TRANSACTION_DATE_REGEX)) {
+            throw new RuntimeException("OpenAI trả về transactionDate không đúng định dạng dd/MM/yyyy");
+        }
+    }
+
+    private String resolveResponsesEndpoint() {
+        String baseUrl = openAiBaseUrl == null ? DEFAULT_OPENAI_BASE_URL : openAiBaseUrl.trim();
+
+        if (baseUrl.isBlank()) {
+            baseUrl = DEFAULT_OPENAI_BASE_URL;
+        }
+
+        if (baseUrl.endsWith("/responses")) {
+            return baseUrl;
+        }
+
+        if (baseUrl.endsWith("/")) {
+            return baseUrl + "responses";
+        }
+
+        return baseUrl + "/responses";
     }
 }
