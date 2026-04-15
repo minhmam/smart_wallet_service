@@ -5,12 +5,11 @@ import com.minhpt.smart_wallet_service.dto.request.CreatePaymentTransactionReque
 import com.minhpt.smart_wallet_service.dto.request.TransactionCreateRequest;
 import com.minhpt.smart_wallet_service.dto.response.PaymentTransactionResponse;
 import com.minhpt.smart_wallet_service.mapper.PaymentTransactionMapper;
+import com.minhpt.smart_wallet_service.mapper.TransactionMapper;
 import com.minhpt.smart_wallet_service.model.*;
 import com.minhpt.smart_wallet_service.payment.vnpay.service.VnpayService;
-import com.minhpt.smart_wallet_service.repository.PaymentTransactionRepository;
-import com.minhpt.smart_wallet_service.repository.SubscriptionPlanRepository;
-import com.minhpt.smart_wallet_service.repository.UserRepository;
-import com.minhpt.smart_wallet_service.repository.UserSubscriptionRepository;
+import com.minhpt.smart_wallet_service.repository.*;
+import com.minhpt.smart_wallet_service.service.AccountBalanceService;
 import com.minhpt.smart_wallet_service.service.PaymentTransactionService;
 import com.minhpt.smart_wallet_service.util.AuthenticationUtil;
 import com.minhpt.smart_wallet_service.util.DataUtil;
@@ -26,6 +25,7 @@ import java.time.LocalDateTime;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -39,6 +39,10 @@ public class PaymentTransactionServiceImpl implements PaymentTransactionService 
     private final VnpayService vnpayService;
     private final UserSubscriptionRepository userSubscriptionRepository;
     private final UserRepository userRepository;
+    public static final long CATEGORY_SHOPPING = 10L;
+    private final TransactionMapper transactionMapper;
+    private final TransactionRepository transactionRepository;
+    private final AccountBalanceRepository accountBalanceRepository;
 
     @Override
     public PaymentTransactionResponse create(CreatePaymentTransactionRequest req, String ipAddress) {
@@ -52,6 +56,12 @@ public class PaymentTransactionServiceImpl implements PaymentTransactionService 
 
         String provider = DataUtil.normalize(req.getProvider()).toUpperCase();
         validateProvider(provider);
+
+        Optional<PaymentTransaction> existingPaymentTransaction = paymentTransactionRepository.findFirstByUserIdAndState(user.getId(), "PENDING");
+
+        if(existingPaymentTransaction.isPresent()){
+            throw new RuntimeException("Bạn đang có giao dịch chưa hoàn tất");
+        }
 
         PaymentTransaction paymentTransaction = PaymentTransaction.builder()
                 .user(user)
@@ -177,9 +187,9 @@ public class PaymentTransactionServiceImpl implements PaymentTransactionService 
             transaction.setState(Constant.STATE_FAILED);
         }
 
-        paymentTransactionRepository.save(transaction);
+        PaymentTransaction savedPaymentTransaction = paymentTransactionRepository.save(transaction);
 
-        createUserSubscriptionAndUpgradeUser(transaction);
+        createUserSubscriptionAndUpgradeUser(savedPaymentTransaction);
     }
 
     private void createUserSubscriptionAndUpgradeUser(PaymentTransaction paymentTransaction) {
@@ -187,10 +197,15 @@ public class PaymentTransactionServiceImpl implements PaymentTransactionService 
             throw new RuntimeException("Chưa hoàn tất giao dịch với mã order thanh toán: " + paymentTransaction.getOrderCode());
         }
 
+        LocalDateTime startDate = null;
         User loginUser = paymentTransaction.getUser();
         SubscriptionPlan subscriptionPlan = paymentTransaction.getSubscriptionPlan();
-
-        LocalDateTime startDate = paymentTransaction.getPaidAt() != null ? paymentTransaction.getPaidAt() : LocalDateTime.now();
+        if(loginUser.getPremiumExpiredAt() != null && loginUser.getPremiumExpiredAt().isAfter(LocalDateTime.now())){
+            startDate = loginUser.getPremiumExpiredAt();
+        }
+        else{
+            startDate = paymentTransaction.getPaidAt() != null ? paymentTransaction.getPaidAt() : LocalDateTime.now();
+        }
         LocalDateTime endDate = startDate.plusDays(subscriptionPlan.getDurationDays());
 
         UserSubscription userSubscription = UserSubscription.builder()
@@ -212,16 +227,28 @@ public class PaymentTransactionServiceImpl implements PaymentTransactionService 
         userRepository.save(loginUser);
 
         //Tao transaction
-        TransactionCreateRequest request = new TransactionCreateRequest();
-        request.builder()
+        TransactionCreateRequest transactionRequest = TransactionCreateRequest.builder()
                 .amount(subscriptionPlan.getPrice())
                 .type("EXPENSE")
-                .description("Thanh toán prenium")
-                .categoryId(1L)
+                .description("Thanh toán premium")
+                .categoryId(CATEGORY_SHOPPING)
                 .transactionDate(LocalDateTime.now())
                 .aiPredicted(false)
                 .build();
 
+        Transaction transaction = transactionMapper.toEntity(transactionRequest);
+
+        transaction.setCreatedBy(loginUser.getUsername());
+        transaction.setUpdatedBy(loginUser.getUsername());
+        transaction.setUserId(loginUser.getId());
+
+        Transaction savedTransaction = transactionRepository.save(transaction);
+
+        //Update balance
+        AccountBalance accountBalance = accountBalanceRepository.findByUserId(loginUser.getId()).orElse(new AccountBalance());
+        BigDecimal presentBalance = accountBalance.getBalance().subtract(savedTransaction.getAmount());
+        accountBalance.setBalance(presentBalance);
+        accountBalanceRepository.save(accountBalance);
     }
 
     private boolean isSuccessResponse(Map<String, String> params) {

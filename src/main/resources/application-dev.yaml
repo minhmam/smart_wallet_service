@@ -27,7 +27,7 @@ jwt:
   expiration: 360000000000
 
 app:
-  baseUrl: https://948b-14-160-26-144.ngrok-free.app
+  baseUrl: https://1b2b-14-160-26-144.ngrok-free.app
 
 vnpay:
   tmnCode: T8I9WSZS
