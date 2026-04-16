@@ -1,7 +1,6 @@
 package com.minhpt.smart_wallet_service.controller;
 
 import com.minhpt.smart_wallet_service.common.ApiResponse;
-import com.minhpt.smart_wallet_service.constant.Constant;
 import com.minhpt.smart_wallet_service.dto.request.CategoryCreateRequest;
 import com.minhpt.smart_wallet_service.dto.request.CategorySearchRequest;
 import com.minhpt.smart_wallet_service.dto.response.CategoryResponse;
@@ -26,69 +25,33 @@ public class CategoryController {
             @RequestParam(defaultValue = "vi") String lang,
             @RequestBody CategorySearchRequest req) {
         Page<CategoryResponse> page = categoryService.search(lang, req);
-        return ResponseEntity.ok(
-                ApiResponse.<List<CategoryResponse>>builder()
-                        .status(200)
-                        .message(Constant.SUCCESS)
-                        .data(page.getContent())
-                        .total(page.getTotalElements())
-                        .build()
-        );
+        return ResponseEntity.ok(ApiResponse.successPage(page.getContent(), page.getTotalElements()));
     }
 
     @PostMapping()
     public ResponseEntity<ApiResponse<CategoryResponse>> createCategory(@Valid @RequestBody CategoryCreateRequest req) {
-        return ResponseEntity.ok(
-                ApiResponse.<CategoryResponse>builder()
-                        .status(200)
-                        .message(Constant.SUCCESS)
-                        .data(categoryService.create(req))
-                        .build()
-        );
+        return ResponseEntity.ok(ApiResponse.success(categoryService.create(req)));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<CategoryResponse>> updateCategory(@PathVariable Long id,
                                                                         @Valid @RequestBody CategoryCreateRequest req) {
-        return ResponseEntity.ok(
-                ApiResponse.<CategoryResponse>builder()
-                        .status(200)
-                        .message(Constant.SUCCESS)
-                        .data(categoryService.update(req, id))
-                        .build()
-        );
+        return ResponseEntity.ok(ApiResponse.success(categoryService.update(req, id)));
     }
 
     @GetMapping("/{categoryId}")
     public ResponseEntity<ApiResponse<CategoryResponse>> getDetail(@PathVariable Long categoryId) {
-        return ResponseEntity.ok(
-                ApiResponse.<CategoryResponse>builder()
-                        .status(200)
-                        .message(Constant.SUCCESS)
-                        .data(categoryService.getDetail(categoryId))
-                        .build()
-        );
+        return ResponseEntity.ok(ApiResponse.success(categoryService.getDetail(categoryId)));
     }
 
     @GetMapping
     public ResponseEntity<ApiResponse<List<CategoryResponse>>> getAll() {
-        return ResponseEntity.ok(
-                ApiResponse.<List<CategoryResponse>>builder()
-                        .status(200)
-                        .message(Constant.SUCCESS)
-                        .data(categoryService.getAll())
-                        .build()
-        );
+        return ResponseEntity.ok(ApiResponse.success(categoryService.getAll()));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<CategoryResponse>> deleteCategory(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<Void>> deleteCategory(@PathVariable Long id) {
         categoryService.delete(id);
-        return ResponseEntity.ok(
-                ApiResponse.<CategoryResponse>builder()
-                        .status(200)
-                        .message(Constant.SUCCESS)
-                        .build()
-        );
+        return ResponseEntity.ok(ApiResponse.success());
     }
 }

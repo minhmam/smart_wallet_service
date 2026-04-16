@@ -28,7 +28,7 @@ public class AccountBalanceServiceImpl implements AccountBalanceService {
         validateBalanceValue(accountBalanceDTO.getBalance());
 
         AccountBalance accountBalance = getOrCreateAccountBalance(loginUser);
-        prepareMetadata(accountBalance, loginUser);
+        accountBalance.setUser(loginUser);
         accountBalance.setBalance(accountBalanceDTO.getBalance());
 
         AccountBalance savedAccountBalance = accountBalanceRepository.save(accountBalance);
@@ -61,7 +61,7 @@ public class AccountBalanceServiceImpl implements AccountBalanceService {
             throw new IllegalArgumentException("Insufficient wallet balance");
         }
 
-        prepareMetadata(accountBalance, loginUser);
+        accountBalance.setUser(loginUser);
         accountBalance.setBalance(updatedBalance);
 
         AccountBalance savedAccountBalance = accountBalanceRepository.save(accountBalance);
@@ -74,15 +74,6 @@ public class AccountBalanceServiceImpl implements AccountBalanceService {
                         .user(loginUser)
                         .balance(BigDecimal.ZERO)
                         .build());
-    }
-
-    private void prepareMetadata(AccountBalance accountBalance, User loginUser) {
-        accountBalance.setUser(loginUser);
-        accountBalance.setBalance(getSafeBalance(accountBalance));
-        if (accountBalance.getCreatedBy() == null) {
-            accountBalance.setCreatedBy(loginUser.getUsername());
-        }
-        accountBalance.setUpdatedBy(loginUser.getUsername());
     }
 
     private BigDecimal getSafeBalance(AccountBalance accountBalance) {

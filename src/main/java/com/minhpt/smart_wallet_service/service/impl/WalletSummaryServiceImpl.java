@@ -3,6 +3,7 @@ package com.minhpt.smart_wallet_service.service.impl;
 import com.minhpt.smart_wallet_service.dto.response.WalletPieChartItemResponse;
 import com.minhpt.smart_wallet_service.dto.response.WalletPieChartResponse;
 import com.minhpt.smart_wallet_service.dto.response.WalletSummaryResponse;
+import com.minhpt.smart_wallet_service.enums.TransactionType;
 import com.minhpt.smart_wallet_service.i18n.MessageResolver;
 import com.minhpt.smart_wallet_service.model.AccountBalance;
 import com.minhpt.smart_wallet_service.model.User;
@@ -102,9 +103,9 @@ public class WalletSummaryServiceImpl implements WalletSummaryService {
             throw new IllegalArgumentException("Type is required");
         }
 
-        String normalizedType = type.trim().toUpperCase();
-        if (!"INCOME".equals(normalizedType) && !"EXPENSE".equals(normalizedType)) {
-            throw new IllegalArgumentException("Type must be either INCOME or EXPENSE");
+        if (!TransactionType.isValid(type)) {
+            throw new IllegalArgumentException("Type must be either "
+                    + TransactionType.INCOME.name() + " or " + TransactionType.EXPENSE.name());
         }
     }
 

@@ -30,27 +30,17 @@ public class SavingGoalsServiceImpl implements SavingGoalsService {
 
     @Override
     public SavingGoalsResponse create(SavingGoalsCreateRequest req) {
-        User loginUser = getCurrentUser();
-
         SavingGoal savingGoal = savingGoalsMapper.toEntity(req);
-        savingGoal.setCreatedBy(loginUser.getUsername());
-        savingGoal.setUpdatedBy(loginUser.getUsername());
-
         savingGoalsRepository.save(savingGoal);
-
         return savingGoalsMapper.toResponse(savingGoal);
     }
 
     @Override
     public SavingGoalsResponse update(SavingGoalsCreateRequest req, Long id) {
-        User loginUser = getCurrentUser();
-
         SavingGoal updateSavingGoal = savingGoalsRepository.findByIdAndStatus(id, Constant.NOT_DELETE)
                 .orElseThrow(() -> new ResourceNotFoundException("Saving goal not found by ID = " + id));
 
         savingGoalsMapper.update(updateSavingGoal, req);
-        updateSavingGoal.setUpdatedBy(loginUser.getUsername());
-
         savingGoalsRepository.save(updateSavingGoal);
 
         return savingGoalsMapper.toResponse(updateSavingGoal);
@@ -66,14 +56,10 @@ public class SavingGoalsServiceImpl implements SavingGoalsService {
 
     @Override
     public void delete(Long id) {
-        String username = getCurrentUser().getUsername();
-
         SavingGoal deleteSavingGoal = savingGoalsRepository.findByIdAndStatus(id, Constant.NOT_DELETE)
                 .orElseThrow(() -> new ResourceNotFoundException("Saving goal not found by ID = " + id));
 
         deleteSavingGoal.setStatus(Constant.DELETED);
-        deleteSavingGoal.setUpdatedBy(username);
-
         savingGoalsRepository.save(deleteSavingGoal);
     }
 
@@ -90,7 +76,6 @@ public class SavingGoalsServiceImpl implements SavingGoalsService {
         accountBalanceService.subtractBalance(amount);
 
         savingGoal.setCurrentAmount(getSafeAmount(savingGoal.getCurrentAmount()).add(amount));
-        savingGoal.setUpdatedBy(loginUser.getUsername());
 
         SavingGoal savedSavingGoal = savingGoalsRepository.save(savingGoal);
         return savingGoalsMapper.toResponse(savedSavingGoal);

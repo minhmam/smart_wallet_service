@@ -55,8 +55,6 @@ public class UserServiceImpl implements UserService {
 
         user.setPassword(passwordEncoder.encode(req.getPassword()));
         user.setVerified(Constant.NOT_VERIFIED);
-        user.setCreatedBy(Constant.USER_DEFAULT);
-        user.setUpdatedBy(Constant.USER_DEFAULT);
 
         User savedUser = userRepository.save(user);
         Role defaultRole = getOrCreateRole(Constant.ROLE_USER);
@@ -199,8 +197,7 @@ public class UserServiceImpl implements UserService {
 
         updateUser.setUpdatedBy(userLogin.getUsername());
 
-        return userMapper.toResponse(userRepository.save(updateUser));
-    }
+        return userMapper.toResponse(userRepository.save(updateUser));    }
 
     @Override
     public UserResponse getCurrentUser() {

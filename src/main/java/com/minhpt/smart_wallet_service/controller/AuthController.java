@@ -1,7 +1,6 @@
 package com.minhpt.smart_wallet_service.controller;
 
 import com.minhpt.smart_wallet_service.common.ApiResponse;
-import com.minhpt.smart_wallet_service.constant.Constant;
 import com.minhpt.smart_wallet_service.dto.request.LoginRequest;
 import com.minhpt.smart_wallet_service.dto.request.UserCreateRequest;
 import com.minhpt.smart_wallet_service.dto.response.AuthResponse;
@@ -28,23 +27,11 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<UserResponse>> createUser(@Valid @RequestBody UserCreateRequest req) {
-        return ResponseEntity.ok(
-                ApiResponse.<UserResponse>builder()
-                        .status(200)
-                        .message("User created successfully")
-                        .data(userService.createUser(req))
-                        .build()
-        );
+        return ResponseEntity.ok(ApiResponse.success(userService.createUser(req), "User created successfully"));
     }
 
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<AuthResponse>> login(@RequestBody LoginRequest req) {
-        return ResponseEntity.ok(
-                ApiResponse.<AuthResponse>builder()
-                        .status(200)
-                        .message(Constant.SUCCESS)
-                        .data(authService.login(req))
-                        .build()
-        );
+        return ResponseEntity.ok(ApiResponse.success(authService.login(req)));
     }
 }

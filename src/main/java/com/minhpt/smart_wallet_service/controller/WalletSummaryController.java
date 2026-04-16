@@ -1,7 +1,6 @@
 package com.minhpt.smart_wallet_service.controller;
 
 import com.minhpt.smart_wallet_service.common.ApiResponse;
-import com.minhpt.smart_wallet_service.constant.Constant;
 import com.minhpt.smart_wallet_service.dto.response.WalletPieChartResponse;
 import com.minhpt.smart_wallet_service.dto.response.WalletSummaryResponse;
 import com.minhpt.smart_wallet_service.service.WalletSummaryService;
@@ -21,13 +20,7 @@ public class WalletSummaryController {
 
     @GetMapping("/summary")
     public ResponseEntity<ApiResponse<WalletSummaryResponse>> getWalletSummary() {
-        return ResponseEntity.ok(
-                ApiResponse.<WalletSummaryResponse>builder()
-                        .status(200)
-                        .message(Constant.SUCCESS)
-                        .data(service.getWalletSummary())
-                        .build()
-        );
+        return ResponseEntity.ok(ApiResponse.success(service.getWalletSummary()));
     }
 
     @GetMapping("/pie-chart")
@@ -36,12 +29,6 @@ public class WalletSummaryController {
             @RequestParam Integer year,
             @RequestParam String type
     ) {
-        return ResponseEntity.ok(
-                ApiResponse.<WalletPieChartResponse>builder()
-                        .status(200)
-                        .message(Constant.SUCCESS)
-                        .data(service.getPieChart(month, year, type))
-                        .build()
-        );
+        return ResponseEntity.ok(ApiResponse.success(service.getPieChart(month, year, type)));
     }
 }

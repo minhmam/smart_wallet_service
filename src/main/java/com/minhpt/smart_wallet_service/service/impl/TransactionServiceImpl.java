@@ -4,6 +4,7 @@ import com.minhpt.smart_wallet_service.constant.Constant;
 import com.minhpt.smart_wallet_service.dto.request.TransactionCreateRequest;
 import com.minhpt.smart_wallet_service.dto.request.TransactionSearchRequest;
 import com.minhpt.smart_wallet_service.dto.response.TransactionResponse;
+import com.minhpt.smart_wallet_service.enums.TransactionType;
 import com.minhpt.smart_wallet_service.exception.ResourceNotFoundException;
 import com.minhpt.smart_wallet_service.mapper.TransactionMapper;
 import com.minhpt.smart_wallet_service.model.Transaction;
@@ -34,8 +35,6 @@ public class TransactionServiceImpl implements TransactionService {
         User loginUser = authenticationUtil.getCurrentUser();
 
         Transaction transaction = transactionMapper.toEntity(req);
-        transaction.setCreatedBy(loginUser.getUsername());
-        transaction.setUpdatedBy(loginUser.getUsername());
         transaction.setUserId(loginUser.getId());
 
         Transaction savedTransaction = transactionRepository.save(transaction);
@@ -61,7 +60,6 @@ public class TransactionServiceImpl implements TransactionService {
         updateTransaction.setCategoryId(req.getCategoryId());
         updateTransaction.setTransactionDate(req.getTransactionDate());
         updateTransaction.setAiPredicted(req.getAiPredicted());
-        updateTransaction.setUpdatedBy(loginUser.getUsername());
 
         BigDecimal newEffect = calculateBalanceEffect(updateTransaction.getType(), updateTransaction.getAmount());
         BigDecimal balanceDelta = newEffect.subtract(currentEffect);
@@ -100,7 +98,6 @@ public class TransactionServiceImpl implements TransactionService {
         BigDecimal balanceDelta = calculateBalanceEffect(deleteTransaction.getType(), deleteTransaction.getAmount()).negate();
 
         deleteTransaction.setStatus(Constant.DELETED);
-        deleteTransaction.setUpdatedBy(loginUser.getUsername());
 
         transactionRepository.save(deleteTransaction);
         adjustWalletBalance(balanceDelta);
@@ -124,15 +121,13 @@ public class TransactionServiceImpl implements TransactionService {
             throw new IllegalArgumentException("Transaction amount is invalid");
         }
 
-        if ("INCOME".equals(type)) {
+        TransactionType transactionType = TransactionType.fromString(type);
+
+        if (transactionType == TransactionType.INCOME) {
             return amount;
         }
 
-        if ("EXPENSE".equals(type)) {
-            return amount.negate();
-        }
-
-        throw new IllegalArgumentException("Invalid transaction type: " + type);
+        return amount.negate();
     }
 
     private void validateTransactionOwner(Transaction transaction, User loginUser) {

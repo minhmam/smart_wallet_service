@@ -1,8 +1,6 @@
 package com.minhpt.smart_wallet_service.controller;
 
 import com.minhpt.smart_wallet_service.common.ApiResponse;
-import com.minhpt.smart_wallet_service.constant.Constant;
-import com.minhpt.smart_wallet_service.dto.response.VerificationTokenResponse;
 import com.minhpt.smart_wallet_service.service.VerificationTokenService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -19,14 +17,8 @@ public class VerificationTokenController {
     private final VerificationTokenService verificationTokenService;
 
     @GetMapping("/verify")
-    public ResponseEntity<ApiResponse<VerificationTokenResponse>> verify(@RequestParam String token) {
+    public ResponseEntity<ApiResponse<Void>> verify(@RequestParam String token) {
         verificationTokenService.verifyEmail(token);
-
-        return ResponseEntity.ok(
-                ApiResponse.<VerificationTokenResponse>builder()
-                        .status(200)
-                        .message(Constant.SUCCESS)
-                        .build()
-        );
+        return ResponseEntity.ok(ApiResponse.success());
     }
 }

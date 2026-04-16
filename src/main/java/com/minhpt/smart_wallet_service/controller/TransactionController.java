@@ -1,7 +1,6 @@
 package com.minhpt.smart_wallet_service.controller;
 
 import com.minhpt.smart_wallet_service.common.ApiResponse;
-import com.minhpt.smart_wallet_service.constant.Constant;
 import com.minhpt.smart_wallet_service.dto.request.TransactionCreateRequest;
 import com.minhpt.smart_wallet_service.dto.request.TransactionSearchRequest;
 import com.minhpt.smart_wallet_service.dto.response.TransactionResponse;
@@ -28,61 +27,28 @@ public class TransactionController {
             @RequestBody TransactionSearchRequest req
     ) {
         Page<TransactionResponse> page = transactionService.search(req);
-        return ResponseEntity.ok(
-                ApiResponse.<List<TransactionResponse>>builder()
-                        .status(200)
-                        .message(Constant.SUCCESS)
-                        .data(page.getContent())
-                        .total(page.getTotalElements())
-                        .build()
-        );
+        return ResponseEntity.ok(ApiResponse.successPage(page.getContent(), page.getTotalElements()));
     }
 
     @PostMapping()
     public ResponseEntity<ApiResponse<TransactionResponse>> create(@Valid @RequestBody TransactionCreateRequest req) {
-        return ResponseEntity.ok(
-                ApiResponse.<TransactionResponse>builder()
-                        .status(200)
-                        .message(Constant.SUCCESS)
-                        .data(transactionService.create(req))
-                        .build()
-
-        );
+        return ResponseEntity.ok(ApiResponse.success(transactionService.create(req)));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<TransactionResponse>> update(@PathVariable Long id,
                                                                    @Valid @RequestBody TransactionCreateRequest req) {
-        return ResponseEntity.ok(
-                ApiResponse.<TransactionResponse>builder()
-                        .status(200)
-                        .message(Constant.SUCCESS)
-                        .data(transactionService.update(req, id))
-                        .build()
-
-        );
+        return ResponseEntity.ok(ApiResponse.success(transactionService.update(req, id)));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<TransactionResponse>> getDetail(@PathVariable Long id) {
-        return ResponseEntity.ok(
-                ApiResponse.<TransactionResponse>builder()
-                        .status(200)
-                        .message(Constant.SUCCESS)
-                        .data(transactionService.getDetail(id))
-                        .build()
-        );
+        return ResponseEntity.ok(ApiResponse.success(transactionService.getDetail(id)));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<TransactionResponse>> delete(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
         transactionService.delete(id);
-        return ResponseEntity.ok(
-                ApiResponse.<TransactionResponse>builder()
-                        .status(200)
-                        .message(Constant.SUCCESS)
-                        .build()
-        );
+        return ResponseEntity.ok(ApiResponse.success());
     }
 }
-

@@ -1,7 +1,6 @@
 package com.minhpt.smart_wallet_service.controller;
 
 import com.minhpt.smart_wallet_service.common.ApiResponse;
-import com.minhpt.smart_wallet_service.constant.Constant;
 import com.minhpt.smart_wallet_service.dto.AccountBalanceDTO;
 import com.minhpt.smart_wallet_service.dto.request.AmountRequest;
 import com.minhpt.smart_wallet_service.service.AccountBalanceService;
@@ -22,24 +21,11 @@ public class AccountBalanceController {
 
     @PostMapping
     public ResponseEntity<ApiResponse<AccountBalanceDTO>> create(@RequestBody AccountBalanceDTO dto) {
-
-        return ResponseEntity.ok(
-                ApiResponse.<AccountBalanceDTO>builder()
-                        .status(200)
-                        .message(Constant.SUCCESS)
-                        .data(accountBalanceService.saveOrUpdate(dto))
-                        .build()
-        );
+        return ResponseEntity.ok(ApiResponse.success(accountBalanceService.saveOrUpdate(dto)));
     }
 
     @PostMapping("/deposit")
     public ResponseEntity<ApiResponse<AccountBalanceDTO>> deposit(@Valid @RequestBody AmountRequest request) {
-        return ResponseEntity.ok(
-                ApiResponse.<AccountBalanceDTO>builder()
-                        .status(200)
-                        .message(Constant.SUCCESS)
-                        .data(accountBalanceService.addBalance(request.getAmount()))
-                        .build()
-        );
+        return ResponseEntity.ok(ApiResponse.success(accountBalanceService.addBalance(request.getAmount())));
     }
 }

@@ -4,6 +4,8 @@ import com.minhpt.smart_wallet_service.constant.Constant;
 import com.minhpt.smart_wallet_service.dto.request.CategoryCreateRequest;
 import com.minhpt.smart_wallet_service.dto.request.CategorySearchRequest;
 import com.minhpt.smart_wallet_service.dto.response.CategoryResponse;
+import com.minhpt.smart_wallet_service.exception.ForbiddenException;
+import com.minhpt.smart_wallet_service.exception.ResourceNotFoundException;
 import com.minhpt.smart_wallet_service.mapper.CategoryMapper;
 import com.minhpt.smart_wallet_service.model.Category;
 import com.minhpt.smart_wallet_service.model.User;
@@ -26,13 +28,8 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public CategoryResponse create(CategoryCreateRequest req) {
-        User loginUser = authenticationUtil.getCurrentUser();
-
         Category category = categoryMapper.toEntity(req);
-        category.setCreatedBy(loginUser.getUsername());
-        category.setUpdatedBy(loginUser.getUsername());
         category.setNameEng(req.getName());
-
         return categoryMapper.toResponse(categoryRepository.save(category));
     }
 
@@ -40,18 +37,17 @@ public class CategoryServiceImpl implements CategoryService {
     public CategoryResponse update(CategoryCreateRequest req, long id) {
         User loginUser = authenticationUtil.getCurrentUser();
         Category updateCategory = categoryRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Category not found by ID = " + id));
-        if (updateCategory.getCreatedBy().equals("system")) {
-            throw new RuntimeException("Không thể cập nhật hạng mục do được tạo bởi hệ thống");
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found by ID = " + id));
+        if (updateCategory.getCreatedBy().equals(Constant.USER_DEFAULT)) {
+            throw new ForbiddenException("Không thể cập nhật hạng mục do được tạo bởi hệ thống");
         }
         if (!updateCategory.getCreatedBy().equals(loginUser.getUsername())) {
-            throw new RuntimeException("Không thể cập nhật hạng mục do không phải người tạo");
+            throw new ForbiddenException("Không thể cập nhật hạng mục do không phải người tạo");
         }
         updateCategory.setName(req.getName());
         updateCategory.setType(req.getType());
         updateCategory.setIcon(req.getIcon());
         updateCategory.setColor(req.getColor());
-        updateCategory.setUpdatedBy(loginUser.getUsername());
 
         categoryRepository.save(updateCategory);
 
@@ -62,12 +58,12 @@ public class CategoryServiceImpl implements CategoryService {
     public void delete(Long id) {
         User loginUser = authenticationUtil.getCurrentUser();
         Category deleteCategory = categoryRepository.findByIdAndStatus(id, Constant.NOT_DELETE)
-                .orElseThrow(() -> new RuntimeException("Category not found by ID = " + id));
-        if (deleteCategory.getCreatedBy().equals("system")) {
-            throw new RuntimeException("Không thể xóa hạng mục do được tạo bởi hệ thống");
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found by ID = " + id));
+        if (deleteCategory.getCreatedBy().equals(Constant.USER_DEFAULT)) {
+            throw new ForbiddenException("Không thể xóa hạng mục do được tạo bởi hệ thống");
         }
         if (!deleteCategory.getCreatedBy().equals(loginUser.getUsername())) {
-            throw new RuntimeException("Không thể xóa hạng mục do không phải người tạo");
+            throw new ForbiddenException("Không thể xóa hạng mục do không phải người tạo");
         }
 
         deleteCategory.setStatus(Constant.DELETED);
@@ -76,19 +72,15 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public List<CategoryResponse> getAll() {
-
         String username = authenticationUtil.getCurrentUser().getUsername();
-
         List<Category> categories = categoryRepository.getAll(username);
-
         return categoryMapper.toListResponse(categories);
     }
 
     @Override
     public CategoryResponse getDetail(Long categoryId) {
         Category category = categoryRepository.findByIdAndStatus(categoryId, Constant.NOT_DELETE)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy hạng mục tưng ứng id = " + categoryId));
-
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found by ID = " + categoryId));
         return categoryMapper.toResponse(category);
     }
 

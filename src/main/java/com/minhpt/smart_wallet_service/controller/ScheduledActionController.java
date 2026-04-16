@@ -1,7 +1,6 @@
 package com.minhpt.smart_wallet_service.controller;
 
 import com.minhpt.smart_wallet_service.common.ApiResponse;
-import com.minhpt.smart_wallet_service.constant.Constant;
 import com.minhpt.smart_wallet_service.dto.request.ScheduledGoalDepositCreateRequest;
 import com.minhpt.smart_wallet_service.dto.request.ScheduledTransactionCreateRequest;
 import com.minhpt.smart_wallet_service.dto.response.ScheduledActionResponse;
@@ -22,47 +21,23 @@ public class ScheduledActionController {
     public ResponseEntity<ApiResponse<ScheduledActionResponse>> createTransactionSchedule(
             @Valid @RequestBody ScheduledTransactionCreateRequest request
     ) {
-        return ResponseEntity.ok(
-                ApiResponse.<ScheduledActionResponse>builder()
-                        .status(200)
-                        .message(Constant.SUCCESS)
-                        .data(scheduledActionService.createTransactionSchedule(request))
-                        .build()
-        );
+        return ResponseEntity.ok(ApiResponse.success(scheduledActionService.createTransactionSchedule(request)));
     }
 
     @PostMapping("/goal-deposit")
     public ResponseEntity<ApiResponse<ScheduledActionResponse>> createGoalDepositSchedule(
             @Valid @RequestBody ScheduledGoalDepositCreateRequest request
     ) {
-        return ResponseEntity.ok(
-                ApiResponse.<ScheduledActionResponse>builder()
-                        .status(200)
-                        .message(Constant.SUCCESS)
-                        .data(scheduledActionService.createGoalDepositSchedule(request))
-                        .build()
-        );
+        return ResponseEntity.ok(ApiResponse.success(scheduledActionService.createGoalDepositSchedule(request)));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<ScheduledActionResponse>> getDetail(@PathVariable Long id) {
-        return ResponseEntity.ok(
-                ApiResponse.<ScheduledActionResponse>builder()
-                        .status(200)
-                        .message(Constant.SUCCESS)
-                        .data(scheduledActionService.getDetail(id))
-                        .build()
-        );
+        return ResponseEntity.ok(ApiResponse.success(scheduledActionService.getDetail(id)));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<ScheduledActionResponse>> cancel(@PathVariable Long id) {
-        return ResponseEntity.ok(
-                ApiResponse.<ScheduledActionResponse>builder()
-                        .status(200)
-                        .message(Constant.SUCCESS)
-                        .data(scheduledActionService.cancel(id))
-                        .build()
-        );
+        return ResponseEntity.ok(ApiResponse.success(scheduledActionService.cancel(id)));
     }
 }

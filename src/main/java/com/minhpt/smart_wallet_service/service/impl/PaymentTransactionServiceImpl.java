@@ -4,6 +4,8 @@ import com.minhpt.smart_wallet_service.constant.Constant;
 import com.minhpt.smart_wallet_service.dto.request.CreatePaymentTransactionRequest;
 import com.minhpt.smart_wallet_service.dto.request.TransactionCreateRequest;
 import com.minhpt.smart_wallet_service.dto.response.PaymentTransactionResponse;
+import com.minhpt.smart_wallet_service.enums.TransactionType;
+import com.minhpt.smart_wallet_service.exception.ResourceNotFoundException;
 import com.minhpt.smart_wallet_service.mapper.PaymentTransactionMapper;
 import com.minhpt.smart_wallet_service.mapper.TransactionMapper;
 import com.minhpt.smart_wallet_service.model.*;
@@ -50,7 +52,7 @@ public class PaymentTransactionServiceImpl implements PaymentTransactionService 
 
         SubscriptionPlan subscriptionPlan = subscriptionPlanRepository
                 .findByIdAndStatus(req.getSubscriptionPlanId(), Constant.NOT_DELETE)
-                .orElseThrow(() -> new RuntimeException(
+                .orElseThrow(() -> new ResourceNotFoundException(
                         "Subscription plan not found by id = " + req.getSubscriptionPlanId()
                 ));
 
@@ -60,7 +62,7 @@ public class PaymentTransactionServiceImpl implements PaymentTransactionService 
         Optional<PaymentTransaction> existingPaymentTransaction = paymentTransactionRepository.findFirstByUserIdAndState(user.getId(), "PENDING");
 
         if(existingPaymentTransaction.isPresent()){
-            throw new RuntimeException("Bạn đang có giao dịch chưa hoàn tất");
+            throw new IllegalArgumentException("Bạn đang có giao dịch chưa hoàn tất");
         }
 
         PaymentTransaction paymentTransaction = PaymentTransaction.builder()
@@ -118,7 +120,7 @@ public class PaymentTransactionServiceImpl implements PaymentTransactionService 
     public PaymentTransactionResponse getDetails(Long id) {
 
         PaymentTransaction paymentTransaction = paymentTransactionRepository.findByIdAndStatus(id, Constant.NOT_DELETE)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy giao dịch nào tương ứng với id = " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy giao dịch nào tương ứng với id = " + id));
 
         return paymentTransactionMapper.toResponse(paymentTransaction);
     }
@@ -229,7 +231,7 @@ public class PaymentTransactionServiceImpl implements PaymentTransactionService 
         //Tao transaction
         TransactionCreateRequest transactionRequest = TransactionCreateRequest.builder()
                 .amount(subscriptionPlan.getPrice())
-                .type("EXPENSE")
+                .type(TransactionType.EXPENSE.name())
                 .description("Thanh toán premium")
                 .categoryId(CATEGORY_SHOPPING)
                 .transactionDate(LocalDateTime.now())

@@ -19,23 +19,11 @@ public class UserController {
 
     @PutMapping("/update")
     public ResponseEntity<ApiResponse<UserResponse>> updateUser(@Valid @RequestBody UserUpdateRequest req) {
-        return ResponseEntity.ok(
-                ApiResponse.<UserResponse>builder()
-                        .status(200)
-                        .message("Update successfully")
-                        .data(userService.update(req))
-                        .build()
-        );
+        return ResponseEntity.ok(ApiResponse.success(userService.update(req), "Update successfully"));
     }
 
     @GetMapping("/detail")
     public ResponseEntity<ApiResponse<UserResponse>> getCurrentUser() {
-        return ResponseEntity.ok(
-                ApiResponse.<UserResponse>builder()
-                        .status(200)
-                        .message("Update successfully")
-                        .data(userService.getCurrentUser())
-                        .build()
-        );
+        return ResponseEntity.ok(ApiResponse.success(userService.getCurrentUser()));
     }
 }

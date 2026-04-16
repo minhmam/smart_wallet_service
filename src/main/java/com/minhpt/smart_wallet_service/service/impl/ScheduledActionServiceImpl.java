@@ -83,9 +83,6 @@ public class ScheduledActionServiceImpl implements ScheduledActionService {
                 .retryCount(0)
                 .build();
 
-        scheduledAction.setCreatedBy(loginUser.getUsername());
-        scheduledAction.setUpdatedBy(loginUser.getUsername());
-
         return toResponse(scheduledActionRepository.save(scheduledAction));
     }
 
@@ -123,9 +120,6 @@ public class ScheduledActionServiceImpl implements ScheduledActionService {
                 .retryCount(0)
                 .build();
 
-        scheduledAction.setCreatedBy(loginUser.getUsername());
-        scheduledAction.setUpdatedBy(loginUser.getUsername());
-
         return toResponse(scheduledActionRepository.save(scheduledAction));
     }
 
@@ -149,7 +143,6 @@ public class ScheduledActionServiceImpl implements ScheduledActionService {
         }
 
         scheduledAction.setScheduleState(Constant.SCHEDULE_STATE_CANCELED);
-        scheduledAction.setUpdatedBy(loginUser.getUsername());
 
         return toResponse(scheduledActionRepository.save(scheduledAction));
     }
@@ -191,7 +184,6 @@ public class ScheduledActionServiceImpl implements ScheduledActionService {
         LocalDateTime currentRunAt = scheduledAction.getNextRunAt();
 
         scheduledAction.setScheduleState(Constant.SCHEDULE_STATE_PROCESSING);
-        scheduledAction.setUpdatedBy(Constant.USER_DEFAULT);
         scheduledActionRepository.save(scheduledAction);
 
         try {
@@ -241,7 +233,6 @@ public class ScheduledActionServiceImpl implements ScheduledActionService {
         scheduledAction.setFailureReason(Constant.SCHEDULE_EXECUTION_FAILED.equals(executionStatus)
                 ? truncateMessage(failureReason)
                 : null);
-        scheduledAction.setUpdatedBy(Constant.USER_DEFAULT);
 
         if (Constant.SCHEDULE_EXECUTION_FAILED.equals(executionStatus)) {
             Integer retryCount = scheduledAction.getRetryCount() == null ? 0 : scheduledAction.getRetryCount();
@@ -266,7 +257,6 @@ public class ScheduledActionServiceImpl implements ScheduledActionService {
         scheduledAction.setLastExecutionStatus(Constant.SCHEDULE_EXECUTION_FAILED);
         scheduledAction.setLastRunAt(LocalDateTime.now());
         scheduledAction.setFailureReason(truncateMessage(message));
-        scheduledAction.setUpdatedBy(Constant.USER_DEFAULT);
         scheduledActionRepository.save(scheduledAction);
     }
 

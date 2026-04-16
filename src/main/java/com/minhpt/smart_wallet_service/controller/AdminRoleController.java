@@ -1,7 +1,6 @@
 package com.minhpt.smart_wallet_service.controller;
 
 import com.minhpt.smart_wallet_service.common.ApiResponse;
-import com.minhpt.smart_wallet_service.constant.Constant;
 import com.minhpt.smart_wallet_service.dto.request.AssignRolesRequest;
 import com.minhpt.smart_wallet_service.dto.response.RoleResponse;
 import com.minhpt.smart_wallet_service.dto.response.UserResponse;
@@ -22,13 +21,7 @@ public class AdminRoleController {
 
     @GetMapping("/roles")
     public ResponseEntity<ApiResponse<List<RoleResponse>>> getAllRoles() {
-        return ResponseEntity.ok(
-                ApiResponse.<List<RoleResponse>>builder()
-                        .status(200)
-                        .message(Constant.SUCCESS)
-                        .data(roleService.getAllRoles())
-                        .build()
-        );
+        return ResponseEntity.ok(ApiResponse.success(roleService.getAllRoles()));
     }
 
     @PutMapping("/users/{userId}/roles")
@@ -36,12 +29,6 @@ public class AdminRoleController {
             @PathVariable Long userId,
             @Valid @RequestBody AssignRolesRequest request
     ) {
-        return ResponseEntity.ok(
-                ApiResponse.<UserResponse>builder()
-                        .status(200)
-                        .message(Constant.SUCCESS)
-                        .data(roleService.assignRoles(userId, request.getRoleNames()))
-                        .build()
-        );
+        return ResponseEntity.ok(ApiResponse.success(roleService.assignRoles(userId, request.getRoleNames())));
     }
 }

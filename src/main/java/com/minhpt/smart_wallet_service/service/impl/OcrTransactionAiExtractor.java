@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.minhpt.smart_wallet_service.dto.response.OcrTransactionResponse;
+import com.minhpt.smart_wallet_service.enums.TransactionType;
 import com.minhpt.smart_wallet_service.model.Category;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -53,7 +54,7 @@ public class OcrTransactionAiExtractor {
         validateOpenAiConfig();
 
         if (categories == null || categories.isEmpty()) {
-            throw new RuntimeException("Không tìm thấy category để AI mapping giao dịch");
+            throw new IllegalArgumentException("Không tìm thấy category để AI mapping giao dịch");
         }
 
         try {
@@ -135,8 +136,9 @@ public class OcrTransactionAiExtractor {
         ObjectNode type = properties.putObject("type");
         type.put("type", "string");
         ArrayNode enums = type.putArray("enum");
-        enums.add("INCOME");
-        enums.add("EXPENSE");
+        for (TransactionType transactionType : TransactionType.values()) {
+            enums.add(transactionType.name());
+        }
 
         ArrayNode required = root.putArray("required");
         required.add("categoryId");
@@ -305,8 +307,7 @@ public class OcrTransactionAiExtractor {
             throw new RuntimeException("OpenAI trả về amount không hợp lệ");
         }
 
-        if (transaction.getType() == null ||
-                (!"INCOME".equals(transaction.getType()) && !"EXPENSE".equals(transaction.getType()))) {
+        if (transaction.getType() == null || !TransactionType.isValid(transaction.getType())) {
             throw new RuntimeException("OpenAI trả về type không hợp lệ");
         }
 
