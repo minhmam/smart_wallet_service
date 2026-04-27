@@ -37,4 +37,6 @@ public class SubscriptionPlan extends BaseEntity {
     @Column(name = "duration_days")
     private Long durationDays;
 
+    @Column(name = "description")
+    private String description;
 }
