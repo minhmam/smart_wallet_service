@@ -42,6 +42,11 @@ public class SecurityConfig {
                                 "/api/v1/payment-transaction/vnpay-return"
                         ).permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        .requestMatchers(
+                                "/api/v1/doashboard/count",
+                                "/api/v1/doashboard/user-growth",
+                                "/api/v1/doashboard/premium-revenue"
+                        ).hasAuthority(Constant.ROLE_ADMIN)
                         .requestMatchers("/api/v1/admin/**").hasAuthority(Constant.ROLE_ADMIN)
                         .anyRequest().hasAnyAuthority(Constant.ROLE_USER, Constant.ROLE_ADMIN)
                 )

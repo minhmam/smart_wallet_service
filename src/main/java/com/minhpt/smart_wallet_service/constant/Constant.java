@@ -32,4 +32,11 @@ public class Constant {
     public static final String SCHEDULE_STATE_COMPLETED = "COMPLETED";
     public static final String SCHEDULE_EXECUTION_SUCCESS = "SUCCESS";
     public static final String SCHEDULE_EXECUTION_FAILED = "FAILED";
+    public static final String NOTIFICATION_TARGET_ALL = "ALL";
+    public static final String NOTIFICATION_TARGET_PREMIUM = "PREMIUM";
+    public static final String NOTIFICATION_TARGET_FREE = "FREE";
+    public static final String NOTIFICATION_RECURRENCE_ONCE = "ONCE";
+    public static final String NOTIFICATION_RECURRENCE_DAILY = "DAILY";
+    public static final String NOTIFICATION_RECURRENCE_WEEKLY = "WEEKLY";
+    public static final String NOTIFICATION_RECURRENCE_MONTHLY = "MONTHLY";
 }

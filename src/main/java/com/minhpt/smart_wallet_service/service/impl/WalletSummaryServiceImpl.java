@@ -1,5 +1,11 @@
 package com.minhpt.smart_wallet_service.service.impl;
 
+import com.minhpt.smart_wallet_service.constant.Constant;
+import com.minhpt.smart_wallet_service.dto.response.DashboardCountResponse;
+import com.minhpt.smart_wallet_service.dto.response.DashboardPremiumRevenueItemResponse;
+import com.minhpt.smart_wallet_service.dto.response.DashboardPremiumRevenueResponse;
+import com.minhpt.smart_wallet_service.dto.response.DashboardUserGrowthItemResponse;
+import com.minhpt.smart_wallet_service.dto.response.DashboardUserGrowthResponse;
 import com.minhpt.smart_wallet_service.dto.response.WalletPieChartItemResponse;
 import com.minhpt.smart_wallet_service.dto.response.WalletPieChartResponse;
 import com.minhpt.smart_wallet_service.dto.response.WalletSummaryResponse;
@@ -8,7 +14,9 @@ import com.minhpt.smart_wallet_service.i18n.MessageResolver;
 import com.minhpt.smart_wallet_service.model.AccountBalance;
 import com.minhpt.smart_wallet_service.model.User;
 import com.minhpt.smart_wallet_service.repository.AccountBalanceRepository;
+import com.minhpt.smart_wallet_service.repository.PaymentTransactionRepository;
 import com.minhpt.smart_wallet_service.repository.TransactionRepository;
+import com.minhpt.smart_wallet_service.repository.UserRepository;
 import com.minhpt.smart_wallet_service.service.WalletSummaryService;
 import com.minhpt.smart_wallet_service.util.AuthenticationUtil;
 import lombok.RequiredArgsConstructor;
@@ -16,9 +24,13 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDateTime;
+import java.time.Year;
 import java.time.YearMonth;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +42,8 @@ public class WalletSummaryServiceImpl implements WalletSummaryService {
 
     private final AccountBalanceRepository accountBalanceRepository;
     private final TransactionRepository transactionRepository;
+    private final UserRepository userRepository;
+    private final PaymentTransactionRepository paymentTransactionRepository;
     private final AuthenticationUtil authenticationUtil;
     private final MessageResolver messageResolver;
 
@@ -89,6 +103,94 @@ public class WalletSummaryServiceImpl implements WalletSummaryService {
                 .type(type.trim().toUpperCase())
                 .totalAmount(totalAmount)
                 .items(normalizedItems)
+                .build();
+    }
+
+    @Override
+    public DashboardCountResponse getDashboardCount() {
+        YearMonth currentMonth = YearMonth.now();
+        LocalDateTime startOfMonth = currentMonth.atDay(1).atStartOfDay();
+        LocalDateTime startOfNextMonth = currentMonth.plusMonths(1).atDay(1).atStartOfDay();
+        LocalDateTime now = LocalDateTime.now();
+
+        return DashboardCountResponse.builder()
+                .totalUsers(userRepository.countUsersByStatus(Constant.NOT_DELETE))
+                .totalRevenueInMonth(defaultAmount(paymentTransactionRepository.getTotalSuccessfulRevenueBetween(
+                        Constant.STATE_SUCCESS,
+                        Constant.NOT_DELETE,
+                        startOfMonth,
+                        startOfNextMonth
+                )))
+                .totalNewTransactions(paymentTransactionRepository.countSuccessfulTransactions(
+                        Constant.STATE_SUCCESS,
+                        Constant.NOT_DELETE
+                ))
+                .totalPremiumMembers(userRepository.countPremiumUsers(Constant.NOT_DELETE, now))
+                .build();
+    }
+
+    @Override
+    public DashboardUserGrowthResponse getUserGrowth(Integer year) {
+        int targetYear = resolveYear(year);
+        LocalDateTime startOfYear = Year.of(targetYear).atDay(1).atStartOfDay();
+        LocalDateTime startOfNextYear = Year.of(targetYear + 1).atDay(1).atStartOfDay();
+
+        Map<Integer, Long> totalUsersByMonth = new HashMap<>();
+        for (Object[] item : userRepository.countNewUsersByMonth(
+                Constant.NOT_DELETE,
+                startOfYear,
+                startOfNextYear
+        )) {
+            totalUsersByMonth.put(toInteger(item[0]), toLong(item[1]));
+        }
+
+        List<DashboardUserGrowthItemResponse> items = new ArrayList<>();
+        for (int month = 1; month <= 12; month++) {
+            items.add(DashboardUserGrowthItemResponse.builder()
+                    .month(month)
+                    .totalUsers(totalUsersByMonth.getOrDefault(month, 0L))
+                    .build());
+        }
+
+        return DashboardUserGrowthResponse.builder()
+                .year(targetYear)
+                .items(items)
+                .build();
+    }
+
+    @Override
+    public DashboardPremiumRevenueResponse getPremiumRevenue(Integer year) {
+        int targetYear = resolveYear(year);
+        LocalDateTime startOfYear = Year.of(targetYear).atDay(1).atStartOfDay();
+        LocalDateTime startOfNextYear = Year.of(targetYear + 1).atDay(1).atStartOfDay();
+
+        Map<Integer, DashboardPremiumRevenueItemResponse> revenueByMonth = new HashMap<>();
+        for (Object[] item : paymentTransactionRepository.getMonthlyPremiumRevenue(
+                Constant.STATE_SUCCESS,
+                Constant.NOT_DELETE,
+                startOfYear,
+                startOfNextYear
+        )) {
+            Integer month = toInteger(item[0]);
+            revenueByMonth.put(month, DashboardPremiumRevenueItemResponse.builder()
+                    .month(month)
+                    .totalRevenue(toBigDecimal(item[1]))
+                    .totalTransactions(toLong(item[2]))
+                    .build());
+        }
+
+        List<DashboardPremiumRevenueItemResponse> items = new ArrayList<>();
+        for (int month = 1; month <= 12; month++) {
+            items.add(revenueByMonth.getOrDefault(month, DashboardPremiumRevenueItemResponse.builder()
+                    .month(month)
+                    .totalRevenue(BigDecimal.ZERO)
+                    .totalTransactions(0L)
+                    .build()));
+        }
+
+        return DashboardPremiumRevenueResponse.builder()
+                .year(targetYear)
+                .items(items)
                 .build();
     }
 
@@ -155,5 +257,25 @@ public class WalletSummaryServiceImpl implements WalletSummaryService {
 
     private String resolveOtherCategoryName() {
         return messageResolver.get(OTHER_CATEGORY_KEY);
+    }
+
+    private int resolveYear(Integer year) {
+        return year != null ? Year.of(year).getValue() : Year.now().getValue();
+    }
+
+    private BigDecimal defaultAmount(BigDecimal amount) {
+        return amount != null ? amount : BigDecimal.ZERO;
+    }
+
+    private Integer toInteger(Object value) {
+        return value != null ? ((Number) value).intValue() : null;
+    }
+
+    private Long toLong(Object value) {
+        return value != null ? ((Number) value).longValue() : 0L;
+    }
+
+    private BigDecimal toBigDecimal(Object value) {
+        return value != null ? new BigDecimal(value.toString()) : BigDecimal.ZERO;
     }
 }

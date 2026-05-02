@@ -25,6 +25,9 @@ public class VerificationTokenServiceImpl implements VerificationTokenService {
     @Value("${link.baseUrl}")
     private String baseUrl;
 
+    @Value("${link.webUrl}")
+    private String webUrl;
+
     @Override
     public void sendVerifyEmail(User user) {
 
@@ -39,7 +42,7 @@ public class VerificationTokenServiceImpl implements VerificationTokenService {
 
         verificationTokenRepository.save(vt);
 
-        String link = baseUrl + "/auth/verify?token=" + token;
+        String link = webUrl + "/auth/verify?token=" + token;
 
         emailService.sendVerifyEmail(user.getEmail(), link);
     }

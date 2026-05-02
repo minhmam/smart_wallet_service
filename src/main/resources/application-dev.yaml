@@ -3,7 +3,7 @@ spring:
     name: smart_wallet_service
 
   datasource:
-    url: jdbc:postgresql://192.168.68.111:5432/smart_wallet
+    url: jdbc:postgresql://192.168.1.11:5432/smart_wallet
     username: admin
     password: adminA@1
     driver-class-name: org.postgresql.Driver
@@ -28,7 +28,8 @@ jwt:
 
 app:
   baseUrl: https://1b2b-14-160-26-144.ngrok-free.app
-
+  notifications:
+    poll-ms: 60000
 vnpay:
   tmnCode: T8I9WSZS
   secretKey: 1G49FUKT7DZRYKB6J0JW7R6BCZ9ESMO5
@@ -62,4 +63,9 @@ openAi:
   api-key: ${OPENAI_API_KEY:sk-}
   model: ${OPENAI_MODEL:gpt-4o-mini}
 link:
-  baseUrl: http://192.168.68.111:8080
+  baseUrl: http://localhost:8080
+  webUrl: http://localhost:3000
+firebase:
+  enabled: true
+  project-id: smart-8d4e4
+  service-account-path: /Users/minhpt/02_Project/01_smart_wallet/smart-8d4e4-firebase-adminsdk-fbsvc-140b2278cf.json

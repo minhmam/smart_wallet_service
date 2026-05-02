@@ -55,7 +55,12 @@ public abstract class BaseEntity {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             if (authentication != null && authentication.isAuthenticated()
                     && !"anonymousUser".equals(authentication.getPrincipal())) {
-                return authentication.getName();
+                Object principal = authentication.getPrincipal();
+
+                if (principal instanceof User) {
+                    User userDetails = (User) principal;
+                    return userDetails.getUsername();
+                }
             }
         } catch (Exception ignored) {
         }
