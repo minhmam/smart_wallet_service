@@ -5,6 +5,7 @@ import com.minhpt.smart_wallet_service.exception.ResourceNotFoundException;
 import com.minhpt.smart_wallet_service.service.VerificationTokenService;
 import com.minhpt.smart_wallet_service.util.AuthenticationUtil;
 import com.minhpt.smart_wallet_service.dto.request.UserCreateRequest;
+import com.minhpt.smart_wallet_service.dto.request.UserSearchRequest;
 import com.minhpt.smart_wallet_service.dto.request.UserUpdateRequest;
 import com.minhpt.smart_wallet_service.dto.response.UserResponse;
 import com.minhpt.smart_wallet_service.mapper.UserMapper;
@@ -17,6 +18,7 @@ import com.minhpt.smart_wallet_service.repository.UserRepository;
 import com.minhpt.smart_wallet_service.service.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -207,6 +209,11 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new ResourceNotFoundException("User not found by id = " + userLogin.getId()));
 
         return userMapper.toResponse(detailUser);
+    }
+
+    @Override
+    public Page<UserResponse> search(UserSearchRequest request) {
+        return userRepository.search(request);
     }
 
     private Role getOrCreateRole(String roleName) {
