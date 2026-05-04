@@ -8,9 +8,13 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface SubscriptionPlanRepository extends JpaRepository<SubscriptionPlan, Long> {
+public interface SubscriptionPlanRepository extends JpaRepository<SubscriptionPlan, Long>, SubscriptionPlanRepositoryCustom {
 
     List<SubscriptionPlan> findAllByStatus(int status);
 
     Optional<SubscriptionPlan> findByIdAndStatus(Long id, int status);
+
+    boolean existsByCodeIgnoreCaseAndStatus(String code, int status);
+
+    boolean existsByCodeIgnoreCaseAndIdNotAndStatus(String code, Long id, int status);
 }

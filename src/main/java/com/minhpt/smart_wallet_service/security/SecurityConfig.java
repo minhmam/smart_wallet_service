@@ -4,6 +4,7 @@ import com.minhpt.smart_wallet_service.constant.Constant;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -48,6 +49,9 @@ public class SecurityConfig {
                                 "/api/v1/doashboard/premium-revenue"
                         ).hasAuthority(Constant.ROLE_ADMIN)
                         .requestMatchers("/api/v1/admin/**").hasAuthority(Constant.ROLE_ADMIN)
+                        .requestMatchers(HttpMethod.POST, "/api/v1/subscription-plan", "/api/v1/subscription-plan/search").hasAuthority(Constant.ROLE_ADMIN)
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/subscription-plan/**").hasAuthority(Constant.ROLE_ADMIN)
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/subscription-plan/**").hasAuthority(Constant.ROLE_ADMIN)
                         .anyRequest().hasAnyAuthority(Constant.ROLE_USER, Constant.ROLE_ADMIN)
                 )
 
