@@ -216,6 +216,13 @@ public class UserServiceImpl implements UserService {
         return userRepository.search(request);
     }
 
+    @Override
+    public UserResponse getById(Long id) {
+        User detailUser = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found by id = " + id));
+        return userMapper.toResponse(detailUser);
+    }
+
     private Role getOrCreateRole(String roleName) {
         return roleRepository.findByName(roleName)
                 .orElseGet(() -> roleRepository.save(

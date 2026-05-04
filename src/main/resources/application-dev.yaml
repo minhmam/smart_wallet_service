@@ -3,7 +3,7 @@ spring:
     name: smart_wallet_service
 
   datasource:
-    url: jdbc:postgresql://192.168.1.11:5432/smart_wallet
+    url: jdbc:postgresql://localhost:5432/smart_wallet
     username: admin
     password: adminA@1
     driver-class-name: org.postgresql.Driver

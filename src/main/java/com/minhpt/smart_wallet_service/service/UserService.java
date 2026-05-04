@@ -15,4 +15,6 @@ public interface UserService {
     UserResponse getCurrentUser();
 
     Page<UserResponse> search(UserSearchRequest request);
+
+    UserResponse getById(Long id);
 }

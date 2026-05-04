@@ -18,4 +18,5 @@ public class SubscriptionPlanResponse {
     private Long price;
     private Long durationDays;
     private Integer status;
+    private String description;
 }

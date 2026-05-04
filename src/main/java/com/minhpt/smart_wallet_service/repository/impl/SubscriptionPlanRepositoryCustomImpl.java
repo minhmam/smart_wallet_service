@@ -35,7 +35,8 @@ public class SubscriptionPlanRepositoryCustomImpl implements SubscriptionPlanRep
                     sp.name,
                     sp.price,
                     sp.duration_days,
-                    sp.status
+                    sp.status,
+                    sp.description
                 from subscription_plans sp
                 where sp.status = 1
                 """);
@@ -86,6 +87,7 @@ public class SubscriptionPlanRepositoryCustomImpl implements SubscriptionPlanRep
                     .price(item[3] != null ? ((Number) item[3]).longValue() : null)
                     .durationDays(item[4] != null ? ((Number) item[4]).longValue() : null)
                     .status(item[5] != null ? ((Number) item[5]).intValue() : null)
+                    .description(item[6] != null ? item[6].toString() : null)
                     .build());
         }
 

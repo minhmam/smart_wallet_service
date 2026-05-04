@@ -1,11 +1,11 @@
 package com.minhpt.smart_wallet_service.service.impl;
 
 import com.minhpt.smart_wallet_service.constant.Constant;
+import com.minhpt.smart_wallet_service.dto.request.AdminUserUpdateRequest;
 import com.minhpt.smart_wallet_service.dto.response.UserResponse;
 import com.minhpt.smart_wallet_service.email.EmailService;
 import com.minhpt.smart_wallet_service.exception.ResourceNotFoundException;
 import com.minhpt.smart_wallet_service.mapper.UserMapper;
-import com.minhpt.smart_wallet_service.model.Role;
 import com.minhpt.smart_wallet_service.model.User;
 import com.minhpt.smart_wallet_service.repository.UserRepository;
 import com.minhpt.smart_wallet_service.service.AdminUserService;
@@ -15,6 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
+import java.util.Locale;
 
 @Service
 @RequiredArgsConstructor
@@ -34,6 +35,13 @@ public class AdminUserServiceImpl implements AdminUserService {
     private final SecureRandom secureRandom = new SecureRandom();
 
     @Override
+    public UserResponse getDetail(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found by ID = " + userId));
+        return userMapper.toResponse(user);
+    }
+
+    @Override
     @Transactional
     public UserResponse resetPassword(Long userId) {
         User user = getActiveUser(userId);
@@ -45,6 +53,44 @@ public class AdminUserServiceImpl implements AdminUserService {
         emailService.sendResetPasswordEmail(savedUser.getEmail(), newPassword);
 
         return userMapper.toResponse(savedUser);
+    }
+
+    @Override
+    @Transactional
+    public UserResponse update(Long userId, AdminUserUpdateRequest request) {
+        if (request == null) {
+            throw new IllegalArgumentException("Update request must not be null");
+        }
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found by ID = " + userId));
+
+        boolean hasChanges = false;
+
+        if (request.getEmail() != null) {
+            String email = normalizeEmail(request.getEmail());
+            if (userRepository.existsByEmailIgnoreCaseAndIdNot(email, userId)) {
+                throw new IllegalArgumentException("Email already exists");
+            }
+            user.setEmail(email);
+            hasChanges = true;
+        }
+
+        if (request.getFullName() != null) {
+            user.setFullName(normalizeFullName(request.getFullName()));
+            hasChanges = true;
+        }
+
+        if (request.getPhoneNumber() != null) {
+            user.setPhoneNumber(normalizePhoneNumber(request.getPhoneNumber()));
+            hasChanges = true;
+        }
+
+        if (!hasChanges) {
+            throw new IllegalArgumentException("At least one field must be provided");
+        }
+
+        return userMapper.toResponse(userRepository.save(user));
     }
 
     @Override
@@ -66,6 +112,30 @@ public class AdminUserServiceImpl implements AdminUserService {
     private User getActiveUser(Long userId) {
         return userRepository.findByIdAndStatus(userId, Constant.NOT_DELETE)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found by ID = " + userId));
+    }
+
+    private String normalizeEmail(String email) {
+        if (email == null || email.isBlank()) {
+            throw new IllegalArgumentException("Email must not be blank");
+        }
+
+        return email.trim().toLowerCase(Locale.ROOT);
+    }
+
+    private String normalizeFullName(String fullName) {
+        if (fullName == null || fullName.isBlank()) {
+            throw new IllegalArgumentException("Full name must not be blank");
+        }
+
+        return fullName.trim();
+    }
+
+    private String normalizePhoneNumber(String phoneNumber) {
+        if (phoneNumber == null || phoneNumber.isBlank()) {
+            throw new IllegalArgumentException("Phone number must not be blank");
+        }
+
+        return phoneNumber.trim();
     }
 
     private String generateStrongPassword() {
